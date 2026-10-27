@@ -1,0 +1,15 @@
+# CSS extract adapter mapping. Adjust these keys to match a real CSS extract.
+record_id: ticket_no
+institution_name: institution_name
+narrative: grievance
+category: grievance_category
+date_received: received_date
+status: current_status
+bureau: bureau_code
+language: language
+complainant_identifier: complainant_ref
+source_record_id: ticket_no
+source_channel: CSS
+date_formats:
+  - "%d/%m/%Y"
+  - "%Y-%m-%d"

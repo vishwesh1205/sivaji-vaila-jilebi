@@ -1,0 +1,16 @@
+# CPGRAMS extract adapter mapping. Registration-number and date formats differ from CSS.
+record_id: registration_number
+institution_name: institution_name
+narrative: grievance_text
+category: category
+date_received: registration_date
+status: current_status
+bureau: department
+language: language
+complainant_identifier: applicant_ref
+source_record_id: registration_number
+source_channel: CPGRAMS
+date_formats:
+  - "%Y-%m-%dT%H:%M:%S"
+  - "%Y-%m-%d %H:%M:%S"
+  - "%d-%m-%Y"

@@ -1,0 +1,74 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: aicte
+      POSTGRES_PASSWORD: aicte
+      POSTGRES_DB: aicte
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aicte"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mock-css:
+    build: ./mock_css
+    ports:
+      - "8101:8101"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8101/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mock-cpgrams:
+    build: ./mock_cpgrams
+    ports:
+      - "8102:8102"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8102/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://aicte:aicte@db:5432/aicte
+      CSS_BASE_URL: http://mock-css:8101
+      CPGRAMS_BASE_URL: http://mock-cpgrams:8102
+      CSS_ADMIN_URL: http://mock-css:8101
+      CPGRAMS_ADMIN_URL: http://mock-cpgrams:8102
+    depends_on:
+      db:
+        condition: service_healthy
+      mock-css:
+        condition: service_healthy
+      mock-cpgrams:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:8000
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:

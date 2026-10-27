@@ -1,0 +1,8 @@
+{"snapshot": true, "records": [
+  {"dataset_key": "aicte-approved-institutions", "period": "2024-25", "dimension": "Tamil Nadu", "metrics": {"approved_institutions": 542, "intake": 218450, "state": "Tamil Nadu"}},
+  {"dataset_key": "aicte-approved-institutions", "period": "2024-25", "dimension": "Maharashtra", "metrics": {"approved_institutions": 486, "intake": 201300, "state": "Maharashtra"}},
+  {"dataset_key": "aicte-approved-institutions", "period": "2024-25", "dimension": "Uttar Pradesh", "metrics": {"approved_institutions": 632, "intake": 276900, "state": "Uttar Pradesh"}},
+  {"dataset_key": "aicte-approved-institutions", "period": "2024-25", "dimension": "Karnataka", "metrics": {"approved_institutions": 398, "intake": 155200, "state": "Karnataka"}},
+  {"dataset_key": "aicte-approved-institutions", "period": "2024-25", "dimension": "West Bengal", "metrics": {"approved_institutions": 287, "intake": 118700, "state": "West Bengal"}},
+  {"dataset_key": "aicte-approved-institutions", "period": "2024-25", "dimension": "Madhya Pradesh", "metrics": {"approved_institutions": 311, "intake": 126500, "state": "Madhya Pradesh"}}
+]}

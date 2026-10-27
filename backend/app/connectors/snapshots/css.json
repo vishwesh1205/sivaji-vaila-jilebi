@@ -1,0 +1,4 @@
+{"simulator": false, "snapshot": true, "tickets": [
+  {"ticket_no": "CSS-SNAP-1001", "institution_name": "St. Xavier Institute of Technology", "grievance": "Fee demand exceeds the approved fee structure. Requesting review.", "grievance_category": "FEE", "received_date": "05/07/2026", "current_status": "Pending", "bureau_code": "RB", "language": "en", "complainant_ref": "snapshot-ref-1"},
+  {"ticket_no": "CSS-SNAP-1002", "institution_name": "National College of Engineering", "grievance": "Faculty shortage in the computer science department.", "grievance_category": "FACULTY", "received_date": "12/06/2026", "current_status": "Pending", "bureau_code": "RB", "language": "en", "complainant_ref": "snapshot-ref-2"}
+]}

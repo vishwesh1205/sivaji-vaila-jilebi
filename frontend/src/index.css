@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-page-bg text-body font-sans;
+}
+
+*:focus-visible {
+  @apply outline-2 outline-offset-2 outline-success;
+}

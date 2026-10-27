@@ -1,0 +1,7 @@
+{"snapshot": true, "data": [
+  {"dataset_key": "department_wise", "period": "2026-07", "dimension": "Department of Higher Education", "received": 12840, "disposed": 10211, "pending": 2629, "ageing_0_60": 1210, "ageing_60_180": 890, "ageing_180_365": 410, "ageing_365_plus": 119},
+  {"dataset_key": "department_wise", "period": "2026-07", "dimension": "AICTE", "received": 1862, "disposed": 1490, "pending": 372, "ageing_0_60": 240, "ageing_60_180": 88, "ageing_180_365": 33, "ageing_365_plus": 11},
+  {"dataset_key": "state_wise", "period": "2026-07", "dimension": "Tamil Nadu", "received": 2034, "disposed": 1711, "pending": 323, "ageing_0_60": 210, "ageing_60_180": 76, "ageing_180_365": 28, "ageing_365_plus": 9},
+  {"dataset_key": "state_wise", "period": "2026-07", "dimension": "Maharashtra", "received": 1849, "disposed": 1590, "pending": 259, "ageing_0_60": 172, "ageing_60_180": 60, "ageing_180_365": 21, "ageing_365_plus": 6},
+  {"dataset_key": "state_wise", "period": "2026-07", "dimension": "Uttar Pradesh", "received": 2210, "disposed": 1812, "pending": 398, "ageing_0_60": 260, "ageing_60_180": 99, "ageing_180_365": 31, "ageing_365_plus": 8}
+]}
