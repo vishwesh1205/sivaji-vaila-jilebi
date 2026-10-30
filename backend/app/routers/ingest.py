@@ -1,5 +1,7 @@
 import csv
+import hashlib
 import io
+import json
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -125,29 +127,85 @@ def ingest_json(body: IngestJSON, db: Session = Depends(get_db), current: models
             continue
         raw_inst = item.get("raw_institution_text") or item.get("institution") or ""
         narrative = item.get("narrative") or raw_inst
-        bureau = db.get(models.Bureau, item.get("bureau_id")) or db.scalar(select(models.Bureau))
+        bureau = db.get(models.Bureau, item.get("bureau_id")) if item.get("bureau_id") else None
+        bureau = bureau or db.scalar(select(models.Bureau))
+        if not bureau:
+            raise HTTPException(status_code=400, detail="No bureaus found")
+        try:
+            source_channel = models.SourceChannel(str(item.get("source_channel") or "DIRECT").upper())
+        except ValueError:
+            source_channel = models.SourceChannel.DIRECT
+        try:
+            category = models.CaseCategory(str(item.get("category") or "OTHER").upper())
+        except ValueError:
+            category = models.CaseCategory.OTHER
+        try:
+            source_type = models.SourceType(str(item.get("source_type") or "MANUAL").upper()).value
+        except ValueError:
+            source_type = models.SourceType.MANUAL.value
+        source_name = str(item.get("source_name") or "json_import").strip()[:80]
+        source_record_id = str(item.get("source_record_id") or case_id)[:150]
+        subject = str(item.get("subject") or "").strip()[:240] or None
+        is_synthetic = item.get("is_synthetic")
+        is_synthetic = source_type == models.SourceType.SIMULATOR.value if is_synthetic is None else bool(is_synthetic)
+        language = str(item.get("language") or "en")[:20]
+        raw_payload_hash = hashlib.sha256(json.dumps(item, sort_keys=True, default=str).encode()).hexdigest()
+        raw_payload = models.RawPayload(
+            source=source_name,
+            source_record_id=source_record_id,
+            payload_json=item,
+            payload_sha256=raw_payload_hash,
+            source_type=source_type,
+            fetched_at=datetime.utcnow(),
+        )
+        db.add(raw_payload)
+        db.flush()
         inst, conf, candidates = resolver.resolve(raw_inst, item.get("hints") or {})
         resolution_status = models.ResolutionStatus.RESOLVED if inst else (models.ResolutionStatus.NEEDS_REVIEW if candidates else models.ResolutionStatus.UNRESOLVED)
+        try:
+            date_received = datetime.fromisoformat(str(item["date_received"])) if item.get("date_received") else datetime.utcnow()
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=400, detail=f"Invalid date_received for case {case_id}")
         case = models.Case(
             case_id=str(case_id),
-            source_channel=models.SourceChannel(item.get("source_channel") or "DIRECT"),
+            source_channel=source_channel,
             institution_id=inst.id if inst else None,
             raw_institution_text=raw_inst,
-            category=models.CaseCategory(item.get("category") or "OTHER"),
+            subject=subject,
+            category=category,
+            category_subtype=str(item.get("category_subtype") or "")[:80] or None,
+            complainant_type=str(item.get("complainant_type") or "")[:40] or None,
             narrative=narrative,
             status=models.CaseStatus.PENDING,
             bureau_id=bureau.id,
-            date_received=datetime.fromisoformat(item["date_received"]) if item.get("date_received") else datetime.utcnow(),
+            date_received=date_received,
             resolution_status=resolution_status,
             match_confidence=conf,
             idempotency_key=idempotency_key,
+            source_type=source_type,
+            is_synthetic=is_synthetic,
+            source_name=source_name,
+            source_record_id=source_record_id,
+            raw_payload_id=raw_payload.id,
+            complainant_hash=item.get("complainant_hash"),
+            language=language,
+            narrative_original=item.get("narrative_original") or narrative,
+            narrative_translated=item.get("narrative_translated") or narrative,
             last_action_at=datetime.utcnow(),
-            last_action_text="Case created via JSON import",
+            last_action_text=f"Case created via JSON import from {source_name}",
         )
         db.add(case)
         db.flush()
         prev = "0" * 64
-        action = models.CaseAction(case_id=case.id, actor_user_id=current.id, bureau_id=case.bureau_id, action_type=models.ActionType.CREATED, remarks="Ingested via JSON", prev_hash=prev, hash=compute_hash(prev, {"action": "CREATED"}))
+        action = models.CaseAction(
+            case_id=case.id,
+            actor_user_id=current.id,
+            bureau_id=case.bureau_id,
+            action_type=models.ActionType.CREATED,
+            remarks=f"Ingested via JSON from {source_name} ({source_type})",
+            prev_hash=prev,
+            hash=compute_hash(prev, {"action": "CREATED", "source": source_name, "record": source_record_id, "payload_sha256": raw_payload_hash}),
+        )
         db.add(action)
         if resolution_status == models.ResolutionStatus.NEEDS_REVIEW and candidates:
             cand_out = [{"institution_id": c.institution.id, "name": c.institution.name, "aicte_permanent_id": c.institution.aicte_permanent_id, "score": c.score, "reasons": c.reasons} for c in candidates]

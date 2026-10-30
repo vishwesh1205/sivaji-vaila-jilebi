@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}About the Demo{% endblock %}
+{% block content %}
+<section class="page-hero page-hero--maroon compact">
+  <div class="container page-hero__inner">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span aria-current="page">About</span></nav>
+      <span class="eyebrow eyebrow--light">Project context</span>
+      <h1>About this educational replica</h1>
+      <p>A local, unofficial CPGRAMS-inspired portal built to demonstrate form design, complaint persistence and status timelines.</p>
+    </div>
+    <div class="page-hero__badge">STUDENT PROJECT<br><span>NOT A GOVERNMENT SERVICE</span></div>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="container prose-layout">
+    <article class="card prose">
+      <h2>Purpose</h2>
+      <p>This project recreates the public-facing layout and essential citizen flows of India's Centralised Public Grievance Redress and Monitoring System (CPGRAMS) for education, interface research and full-stack demonstration. It is not a government service and must not be used to submit a real complaint.</p>
+      <p>The visual hierarchy — a reference-style identity strip, masthead, maroon navigation, hero carousel, about/What's New columns, quick-action cards and a dark footer — was studied from the official reference pages, then rebuilt with original markup and locally created assets.</p>
+
+      <h2>What is real in this project</h2>
+      <ul>
+        <li>The web application runs locally and all navigation and forms work.</li>
+        <li>Demo complaints are genuinely persisted in a local SQLite database.</li>
+        <li>Registration numbers are generated transactionally and constrained to be unique.</li>
+        <li>Status timelines, reminders, feedback and exports reflect the stored rows.</li>
+        <li>Server-side validation and accessible error states are implemented.</li>
+        <li>Hindi and Tamil translations are provided for core navigation and messages.</li>
+      </ul>
+
+      <h2>What is simulated or different</h2>
+      <ul>
+        <li>No department, ministry, officer or government system is contacted.</li>
+        <li>There is no real registration, password, OTP, CAPTCHA, appeal or legal remedy.</li>
+        <li>Departments, categories and responses are representative examples, not an authoritative directory.</li>
+        <li>Status changes are demonstrative and do not reflect any real grievance lifecycle.</li>
+        <li>The login mechanism is a local demo cookie, not identity verification.</li>
+      </ul>
+
+      <div class="warning-panel">
+        <strong>Official portal</strong>
+        <p>For a real grievance, use the official CPGRAMS portal at <a href="{{ official_url }}" target="_blank" rel="noopener noreferrer">pgportal.gov.in</a>. This project has no affiliation with DARPG, NIC, MeitY or any government body.</p>
+      </div>
+
+      <h2>Technology stack</h2>
+      <p>The local environment on this Linux machine does not have the .NET/ASP.NET runtimes required by the production CPGRAMS stack. The demo therefore uses a modern local stack:</p>
+      <div class="tech-grid">
+        <div><strong>Backend</strong><span>Python 3 · FastAPI · server-rendered Jinja2</span></div>
+        <div><strong>Data</strong><span>SQLite with constraints and transactional reference allocation</span></div>
+        <div><strong>Frontend</strong><span>HTML5 · CSS3 · progressive vanilla JavaScript</span></div>
+        <div><strong>Testing</strong><span>pytest · FastAPI TestClient · live HTTP checks</span></div>
+      </div>
+      <p class="small-muted">This is a modern local implementation and not the confirmed production stack of the official website.</p>
+
+      <h2>Data honesty</h2>
+      <p>Seeded records are fictional. User-created records are labelled as local demo submissions. The interface repeatedly states that no real grievance is filed. The optional dashboard adapter is disabled unless an operator explicitly configures an authorised local endpoint and token.</p>
+
+      <h2>Reference pages inspected</h2>
+      <ul class="link-list">
+        <li><a href="{{ official_url }}/V7/Home" target="_blank" rel="noopener noreferrer">Homepage layout and content hierarchy ↗</a></li>
+        <li><a href="{{ official_url }}/Signin/Login" target="_blank" rel="noopener noreferrer">Login page structure ↗</a></li>
+        <li><a href="{{ official_url }}/Status" target="_blank" rel="noopener noreferrer">View Status form ↗</a></li>
+        <li><a href="{{ official_url }}/Home/LodgeGrievance" target="_blank" rel="noopener noreferrer">Lodge Public Grievance flow ↗</a></li>
+      </ul>
+    </article>
+
+    <aside class="side-stack">
+      <div class="card card--tint">
+        <h2>At a glance</h2>
+        <dl class="summary-list">
+          <dt>Type</dt><dd>Educational demo</dd>
+          <dt>Status</dt><dd>Fully local</dd>
+          <dt>Real filing</dt><dd>Not possible</dd>
+          <dt>Credentials</dt><dd>Never requested</dd>
+          <dt>Data store</dt><dd>SQLite</dd>
+          <dt>Languages</dt><dd>English, Hindi, Tamil</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h2>Quick links</h2>
+        <div class="stacked-links">
+          <a class="text-link" href="/grievance/new">Lodge a demo grievance →</a>
+          <a class="text-link" href="/status">Track a demo grievance →</a>
+          <a class="text-link" href="/privacy">Demo data policy →</a>
+          <a class="text-link" href="/faq">FAQs →</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

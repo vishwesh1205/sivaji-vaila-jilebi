@@ -1,4 +1,4 @@
-.PHONY: up down build seed reseed-realistic test backend-test frontend-build
+.PHONY: up down build seed reseed-realistic test backend-test frontend-build matching-benchmark
 
 up:
 	docker compose up --build
@@ -23,3 +23,6 @@ backend-test:
 
 frontend-build:
 	cd frontend && npm run build
+
+matching-benchmark:
+	cd backend && PYTHONPATH=. python -m app.benchmarks.runner --json /tmp/matching_benchmark.json --csv /tmp/matching_benchmark.csv

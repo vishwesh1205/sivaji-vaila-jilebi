@@ -58,6 +58,7 @@ def list_institutions(
                 "region": inst.region,
                 "approval_status": inst.approval_status,
                 "programme_mix": inst.programme_mix,
+                "grc_first_resolution_days": inst.grc_first_resolution_days,
                 "source_type": inst.source_type,
                 "is_synthetic": inst.is_synthetic,
                 "risk_score": risk["score"],
@@ -90,6 +91,7 @@ def get_institution(id: int, db: Session = Depends(get_db), current: models.User
         "approval_status": inst.approval_status,
         "programme_mix": inst.programme_mix,
         "aliases": inst.aliases,
+        "grc_first_resolution_days": inst.grc_first_resolution_days,
         "source_type": inst.source_type,
         "is_synthetic": inst.is_synthetic,
     }
@@ -152,6 +154,7 @@ def institution_360(id: int, db: Session = Depends(get_db), current: models.User
             "university_affiliation": inst.university_affiliation,
             "approval_status": inst.approval_status,
             "programme_mix": inst.programme_mix,
+            "grc_first_resolution_days": inst.grc_first_resolution_days,
             "source_type": inst.source_type,
             "is_synthetic": inst.is_synthetic,
         },

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Demo Record Not Found{% endblock %}
+{% block content %}
+<section class="content-section">
+  <div class="container narrow">
+    <div class="state-card state-card--warning">
+      <div class="state-card__icon" aria-hidden="true">?</div>
+      <span class="eyebrow eyebrow--dark">No local match</span>
+      <h1>We could not find that demo grievance</h1>
+      <p>No record matched the supplied reference and verification code. Nothing was sent to the real CPGRAMS service.</p>
+      {% if reference %}<p class="mono state-ref">{{ reference }}</p>{% endif %}
+      <div class="state-card__hints">
+        <h2>Check the following</h2>
+        <ul class="check-list">
+          <li>Both the registration number and verification code are required.</li>
+          <li>Demo references look like <code>CPGRAMS-DEMO-{{ current_year }}-00001</code>.</li>
+          <li>The verification code is the demo complainant reference, not a password.</li>
+          <li>A record created on this machine is stored only in its local SQLite database.</li>
+        </ul>
+      </div>
+      <div class="state-card__actions">
+        <a class="btn btn--primary" href="/status">Try another reference</a>
+        <a class="btn btn--outline" href="/status/view?ref=CPGRAMS-DEMO-{{ current_year }}-00001&verification=DEMO-CITIZEN-001">Open seeded example</a>
+        <a class="btn btn--ghost" href="/">Return home</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

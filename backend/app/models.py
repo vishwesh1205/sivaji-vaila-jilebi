@@ -154,6 +154,7 @@ class Institution(Base):
     approval_status: Mapped[str] = mapped_column(String(80), default="Approved")
     programme_mix: Mapped[list[Any]] = mapped_column(JSON, default=list)
     aliases: Mapped[list[str]] = mapped_column(JSON, default=list)
+    grc_first_resolution_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
     is_synthetic: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     source_type: Mapped[str] = mapped_column(String(30), default=SourceType.SIMULATOR.value, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
@@ -318,6 +319,22 @@ class ReviewQueue(Base):
     case: Mapped[Case] = relationship(back_populates="reviews")
     chosen_institution: Mapped[Institution | None] = relationship()
 
+
+
+class PrecedentFeedback(Base):
+    __tablename__ = "precedent_feedback"
+    __table_args__ = (
+        UniqueConstraint("case_id", "precedent_case_id", "user_id", name="uq_precedent_feedback_user"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    case_id: Mapped[int] = mapped_column(ForeignKey("cases.id"), index=True)
+    precedent_case_id: Mapped[int] = mapped_column(ForeignKey("cases.id"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    feedback: Mapped[str] = mapped_column(String(30), index=True)
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
 
 
 class DataSource(Base):

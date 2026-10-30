@@ -1,5 +1,6 @@
 import csv
 import io
+import json
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -104,7 +105,11 @@ def get_report(report_type: str, format: str = Query(default="json"), db: Sessio
             if data:
                 ws.append(list(data[0].keys()))
                 for row in data:
-                    ws.append([row.get(k) for k in data[0].keys()])
+                    values = []
+                    for k in data[0].keys():
+                        value = row.get(k)
+                        values.append(json.dumps(value) if isinstance(value, (list, dict)) else value)
+                    ws.append(values)
             bio = io.BytesIO()
             wb.save(bio)
             bio.seek(0)

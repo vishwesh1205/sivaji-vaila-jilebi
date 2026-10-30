@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Demo Support{% endblock %}
+{% block content %}
+<section class="page-hero page-hero--navy compact">
+  <div class="container page-hero__inner">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span aria-current="page">Contact</span></nav>
+      <span class="eyebrow eyebrow--light">Demo support</span>
+      <h1>Contact the demo project</h1>
+      <p>This form saves a message to the local SQLite database. It is not a government grievance channel and is not monitored by any public authority.</p>
+    </div>
+    <div class="page-hero__badge">NO OFFICIAL<br><span>CONTACT DETAILS</span></div>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="container form-layout">
+    <div class="card form-card">
+      <div class="card__head card__head--border">
+        <div><span class="eyebrow eyebrow--dark">Local demo message</span><h2>Send a fictional message</h2></div>
+        <span class="required-note">{{ t('form.mandatory') }}</span>
+      </div>
+      {% if errors %}
+      <div class="alert alert--error" role="alert"><span class="alert__icon" aria-hidden="true">!</span><span>Please correct the highlighted fields. Nothing was saved.</span></div>
+      {% endif %}
+      <form action="/contact" method="post" class="stack-form" novalidate>
+        <div class="field-grid">
+          <div class="field">
+            <label for="name">Name <span class="req">*</span></label>
+            <input id="name" name="name" type="text" maxlength="80" value="{{ values.name or '' }}" autocomplete="off" {% if errors.name %}aria-invalid="true" aria-describedby="name_error"{% endif %} required>
+            {% if errors.name %}<p class="field-error" id="name_error">{{ errors.name }}</p>{% endif %}
+          </div>
+          <div class="field">
+            <label for="email">Demo email <span class="req">*</span></label>
+            <input id="email" name="email" type="email" maxlength="120" value="{{ values.email or '' }}" placeholder="you@example.test" autocomplete="off" {% if errors.email %}aria-invalid="true" aria-describedby="email_error"{% endif %} required>
+            {% if errors.email %}<p class="field-error" id="email_error">{{ errors.email }}</p>{% endif %}
+          </div>
+          <div class="field field--span2">
+            <label for="subject">Subject <span class="req">*</span></label>
+            <input id="subject" name="subject" type="text" maxlength="120" value="{{ values.subject or '' }}" {% if errors.subject %}aria-invalid="true" aria-describedby="subject_error"{% endif %} required>
+            {% if errors.subject %}<p class="field-error" id="subject_error">{{ errors.subject }}</p>{% endif %}
+          </div>
+          <div class="field field--span2">
+            <label for="message">Message <span class="req">*</span></label>
+            <textarea id="message" name="message" rows="7" maxlength="2000" {% if errors.message %}aria-invalid="true" aria-describedby="message_error"{% endif %} required>{{ values.message or '' }}</textarea>
+            <p class="form-help">10–2,000 characters. Do not include real personal information or government credentials.</p>
+            {% if errors.message %}<p class="field-error" id="message_error">{{ errors.message }}</p>{% endif %}
+          </div>
+        </div>
+        <div class="inline-notice">
+          <strong>No official contact details are invented.</strong> This project does not publish phone numbers, officer addresses or government authorisation claims.
+        </div>
+        <div class="form-actions">
+          <a class="btn btn--outline" href="/">Cancel</a>
+          <button class="btn btn--primary" type="submit">Save demo message <span aria-hidden="true">→</span></button>
+        </div>
+      </form>
+    </div>
+
+    <aside class="form-aside">
+      <div class="card card--tint">
+        <h2>Where messages go</h2>
+        <p class="small-muted">Messages are written to the <code>contact_messages</code> table in the local demo database. There is no mailbox, ticket queue or support team.</p>
+      </div>
+      <div class="card">
+        <h2>Need help with the demo?</h2>
+        <ul class="check-list">
+          <li>Read the <a href="/faq">FAQs</a> for seeded references and reset instructions.</li>
+          <li>Use <a href="/status">View Status</a> to test tracking.</li>
+          <li>Use the <a href="/sitemap">site map</a> to find every implemented route.</li>
+        </ul>
+      </div>
+      <div class="card card--guidance">
+        <h2>Real grievance?</h2>
+        <p class="small-muted">Use the official portal. This project cannot forward, store or escalate a real complaint.</p>
+        <a class="btn btn--outline btn--full" href="{{ official_url }}" target="_blank" rel="noopener noreferrer">Official CPGRAMS ↗</a>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

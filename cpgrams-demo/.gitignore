@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+data/*.db
+data/*.db-*
+data/uploads/*
+!data/uploads/.gitkeep
+.env
+.env.*
+!.env.example
+.vercel

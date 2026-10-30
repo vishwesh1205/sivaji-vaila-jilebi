@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .database import Base, SessionLocal, engine
-from .routers import auth, cases, dashboard, ingest, institutions, notifications, overlaps, reports, review, audit, sources, provenance, innovations, events
+from .routers import auth, cases, dashboard, ingest, institutions, matching, notifications, overlaps, reports, review, audit, sources, provenance, innovations, events
 from .scheduler import start_scheduler, stop_scheduler
 from .schema_guard import ensure_columns
 from .services.ingestion import ensure_data_sources
@@ -48,6 +48,7 @@ app.include_router(institutions.router, prefix="/institutions", tags=["instituti
 app.include_router(cases.router, prefix="/cases", tags=["cases"])
 app.include_router(ingest.router, prefix="/ingest", tags=["ingestion"])
 app.include_router(review.router, prefix="/review-queue", tags=["resolution-review"])
+app.include_router(matching.router, prefix="/matching", tags=["matching-evaluation"])
 app.include_router(overlaps.router, prefix="/overlaps", tags=["overlaps"])
 app.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
 app.include_router(notifications.router, prefix="/notifications", tags=["notifications"])

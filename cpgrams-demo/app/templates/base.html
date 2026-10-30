@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Unofficial educational CPGRAMS-style demo portal. No real government grievance is filed.">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}CPGRAMS Demo{% endblock %} — Unofficial Educational Demo</title>
+  <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
+  <link rel="stylesheet" href="/static/css/site.css">
+</head>
+<body class="lang-{{ lang }}">
+  <a class="skip-link" href="#main-content">{{ t('nav.home') }} / Skip to main content</a>
+
+  <div class="demo-ribbon" role="alert">
+    <span class="demo-ribbon__icon" aria-hidden="true">!</span>
+    <strong>{{ t('demo_notice') }}</strong>
+  </div>
+
+  <div class="site-shell">
+    <div class="top-strip">
+      <div class="container top-strip__inner">
+        <div class="identity-strip">
+          <span class="identity-strip__label">{{ t('top.reference') }}</span>
+          <span class="identity-strip__divider" aria-hidden="true">|</span>
+          <span class="identity-strip__ministry">{{ t('top.ministry') }}</span>
+        </div>
+        <nav class="top-links" aria-label="Utility navigation">
+          <a href="/">{{ t('top.home') }}</a>
+          <a href="/contact">{{ t('top.contact') }}</a>
+          <a href="/about">{{ t('top.about') }}</a>
+          <a href="/faq">{{ t('top.faq') }}</a>
+          <a href="/sitemap">{{ t('top.sitemap') }}</a>
+        </nav>
+      </div>
+    </div>
+
+    <header class="masthead">
+      <div class="container masthead__inner">
+        <div class="brand">
+          <img class="brand__emblem" src="/static/img/emblem.svg" alt="Neutral demo emblem — not a government emblem" width="74" height="74">
+          <div class="brand__text">
+            <div class="brand__title-row">
+              <h1 class="brand__title">CPGRAMS <span>DEMO</span></h1>
+              <span class="demo-chip">{{ t('brand.badge') }}</span>
+            </div>
+            <p class="brand__subtitle">{{ t('brand.subtitle') }}</p>
+            <p class="brand__reference">Unofficial student project · local SQLite · no government connection</p>
+          </div>
+        </div>
+        <div class="masthead__meta">
+          <div class="meta-card">
+            <span class="meta-card__kicker">Reference-inspired interface</span>
+            <strong>Not an official portal</strong>
+            <span>No Aadhaar, password, OTP or CAPTCHA requested</span>
+          </div>
+          <a class="meta-link" href="{{ official_url }}" target="_blank" rel="noopener noreferrer">
+            Official CPGRAMS <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="nav-shell">
+      <div class="container nav-shell__inner">
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+          <span class="nav-toggle__bars" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>Menu</span>
+        </button>
+        <nav id="primary-navigation" class="primary-nav" aria-label="Primary navigation">
+          <a class="nav-link {% if active == 'home' %}is-active{% endif %}" href="/">{{ t('nav.home') }}</a>
+          <div class="nav-dropdown {% if active in ['grievance','process'] %}is-active{% endif %}">
+            <button class="nav-link nav-dropdown__button" type="button" aria-expanded="false" aria-haspopup="true">
+              {{ t('nav.grievance') }} <span class="chev" aria-hidden="true">▾</span>
+            </button>
+            <div class="nav-dropdown__menu" role="menu">
+              <a role="menuitem" href="/grievance/new">{{ t('nav.lodge_public') }}</a>
+              <a role="menuitem" href="/grievance/pension">{{ t('nav.lodge_pension') }}</a>
+              <a role="menuitem" href="/status">{{ t('nav.status') }}</a>
+              <a role="menuitem" href="/reminder">{{ t('nav.reminder') }}</a>
+              <a role="menuitem" href="/feedback">{{ t('nav.feedback') }}</a>
+              <a role="menuitem" href="/grievance/process">{{ t('nav.process') }}</a>
+            </div>
+          </div>
+          <a class="nav-link {% if active == 'status' %}is-active{% endif %}" href="/status">{{ t('nav.status') }}</a>
+          <a class="nav-link {% if active == 'reminder' %}is-active{% endif %}" href="/reminder">{{ t('nav.reminder') }}</a>
+          <a class="nav-link {% if active == 'feedback' %}is-active{% endif %}" href="/feedback">{{ t('nav.feedback') }}</a>
+          <a class="nav-link {% if active == 'faq' %}is-active{% endif %}" href="/faq">{{ t('nav.help') }}</a>
+
+          <div class="nav-dropdown nav-dropdown--end lang-dropdown {% if fallback_active %}has-fallback{% endif %}">
+            <button class="nav-link nav-dropdown__button" type="button" aria-expanded="false" aria-haspopup="true">
+              <span class="lang-icon" aria-hidden="true">अ</span>
+              {{ t('nav.language') }}: {{ selected_language.native }} <span class="chev" aria-hidden="true">▾</span>
+            </button>
+            <div class="nav-dropdown__menu lang-menu" role="menu">
+              <p class="lang-menu__hint">English, Hindi and Tamil are fully translated. Other languages fall back to English.</p>
+              {% for language in languages %}
+              <a role="menuitem" href="/language/{{ language.code }}?next={{ (request.url.path ~ ('?' ~ request.url.query if request.url.query else '')) | urlencode }}" class="{% if language.code == lang %}is-current{% endif %}">
+                <span>{{ language.native }}</span>
+                <small>{{ language.label }}{% if not language.full %} · EN fallback{% endif %}</small>
+              </a>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="nav-auth">
+            {% if session %}
+            <span class="signed-in">{{ t('nav.signed_in') }} <strong>{{ session.display_name }}</strong></span>
+            <form action="/logout" method="post">
+              <button class="btn btn--nav-ghost" type="submit">{{ t('nav.signout') }}</button>
+            </form>
+            {% else %}
+            <a class="btn btn--nav" href="/login">{{ t('nav.signin') }}</a>
+            {% endif %}
+          </div>
+        </nav>
+      </div>
+    </div>
+
+    {% if fallback_active %}
+    <div class="container">
+      <div class="fallback-note" role="note">
+        {{ t('lang.fallback_notice') }}
+      </div>
+    </div>
+    {% endif %}
+
+    <main id="main-content" class="page-main">
+      {% if flash %}
+      <div class="container">
+        <div class="alert alert--{{ flash.kind }}" role="status" tabindex="-1">
+          <span class="alert__icon" aria-hidden="true">{% if flash.kind == 'error' %}!{% else %}✓{% endif %}</span>
+          <span>{{ flash.message }}</span>
+        </div>
+      </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div class="footer-col footer-col--brand">
+          <div class="footer-brand"><span class="footer-brand__mark">CP</span> CPGRAMS <strong>DEMO</strong></div>
+          <p>{{ t('footer.about') }}</p>
+          <p class="footer-warning">EDUCATIONAL DEMO — UNOFFICIAL REPLICA. NOT CONNECTED TO THE GOVERNMENT OF INDIA. NO REAL GOVERNMENT GRIEVANCE IS FILED.</p>
+          <p class="footer-small">{{ t('footer.local') }}</p>
+        </div>
+        <div class="footer-col">
+          <h2>{{ t('footer.quick') }}</h2>
+          <ul>
+            <li><a href="/grievance/new">{{ t('nav.lodge_public') }}</a></li>
+            <li><a href="/status">{{ t('nav.status') }}</a></li>
+            <li><a href="/reminder">{{ t('nav.reminder') }}</a></li>
+            <li><a href="/feedback">{{ t('nav.feedback') }}</a></li>
+            <li><a href="/grievance/process">{{ t('nav.process') }}</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h2>{{ t('footer.help') }}</h2>
+          <ul>
+            <li><a href="/faq">{{ t('nav.help') }}</a></li>
+            <li><a href="/contact">{{ t('top.contact') }}</a></li>
+            <li><a href="/about">{{ t('top.about') }}</a></li>
+            <li><a href="/sitemap">{{ t('top.sitemap') }}</a></li>
+            <li><a href="/export/complaints.json">JSON export</a></li>
+            <li><a href="/export/complaints.csv">CSV export</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h2>{{ t('footer.policies') }}</h2>
+          <ul>
+            <li><a href="/privacy">{{ t('footer.privacy') }}</a></li>
+            <li><a href="/disclaimer">{{ t('footer.disclaimer') }}</a></li>
+            <li><a href="/api/complaints">Local read-only API</a></li>
+            <li><a href="{{ official_url }}" target="_blank" rel="noopener noreferrer">{{ t('footer.official') }} ↗</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container footer-bottom__inner">
+          <span>{{ t('footer.version') }} · © {{ current_year }} student project</span>
+          <span>Not affiliated with DARPG, NIC or the Government of India.</span>
+          <span>Best viewed at 1440 × 900 · responsive down to mobile</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static/js/site.js" defer></script>
+</body>
+</html>

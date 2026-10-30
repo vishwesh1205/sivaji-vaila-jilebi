@@ -141,12 +141,14 @@ def region_wise(db: Session = Depends(get_db), current: models.User = Depends(ge
 def proof_summary(db: Session = Depends(get_db), current: models.User = Depends(get_current_user)):
     since = datetime.utcnow() - timedelta(hours=24)
     cases = db.scalars(select(models.Case).where(models.Case.created_at >= since)).all()
-    counts = {"css": 0, "cpgrams": 0, "manual": 0, "file_upload": 0, "seed_simulator": 0}
+    counts = {"css": 0, "cpgrams": 0, "cpgrams_demo": 0, "manual": 0, "file_upload": 0, "seed_simulator": 0}
     for c in cases:
         if c.source_name == "css":
             counts["css"] += 1
         elif c.source_name == "cpgrams":
             counts["cpgrams"] += 1
+        elif c.source_name == "CPGRAMS Simulator":
+            counts["cpgrams_demo"] += 1
         elif c.source_type == models.SourceType.FILE_UPLOAD.value:
             counts["file_upload"] += 1
         elif c.source_type == models.SourceType.SIMULATOR.value:
@@ -160,6 +162,7 @@ def proof_summary(db: Session = Depends(get_db), current: models.User = Depends(
         "window_hours": 24,
         "css": counts["css"],
         "cpgrams": counts["cpgrams"],
+        "cpgrams_demo": counts["cpgrams_demo"],
         "manual": counts["manual"],
         "file_upload": counts["file_upload"],
         "seed_simulator": counts["seed_simulator"],
@@ -170,6 +173,7 @@ def proof_summary(db: Session = Depends(get_db), current: models.User = Depends(
         "simulator_counts": {
             "css": db.scalar(select(func.count(models.Case.id)).where(models.Case.source_name == "css", models.Case.source_type == "SIMULATOR", models.Case.created_at >= since)) or 0,
             "cpgrams": db.scalar(select(func.count(models.Case.id)).where(models.Case.source_name == "cpgrams", models.Case.source_type == "SIMULATOR", models.Case.created_at >= since)) or 0,
+            "cpgrams_demo": db.scalar(select(func.count(models.Case.id)).where(models.Case.source_name == "CPGRAMS Simulator", models.Case.source_type == "SIMULATOR", models.Case.created_at >= since)) or 0,
         },
     }
 

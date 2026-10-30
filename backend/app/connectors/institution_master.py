@@ -42,6 +42,13 @@ class InstitutionMasterImporter:
             aliases = [a.strip() for a in aliases_raw.replace("|", ";").split(";") if a.strip()]
             programmes_raw = str(self._field(row, "programme_mix") or "")
             programmes = [p.strip() for p in programmes_raw.replace("|", ";").split(";") if p.strip()]
+            resolution_raw = str(self._field(row, "grc_first_resolution_days") or "").strip()
+            try:
+                grc_first_resolution_days = int(float(resolution_raw)) if resolution_raw and resolution_raw.lower() not in {"nan", "none", "unknown", "na", "n/a"} else None
+                if grc_first_resolution_days is not None and grc_first_resolution_days < 0:
+                    grc_first_resolution_days = None
+            except (TypeError, ValueError):
+                grc_first_resolution_days = None
             values = {
                 "name": name,
                 "normalized_name": normalize_name(name),
@@ -53,6 +60,7 @@ class InstitutionMasterImporter:
                 "approval_status": str(self._field(row, "approval_status") or "Approved"),
                 "programme_mix": programmes,
                 "aliases": aliases,
+                "grc_first_resolution_days": grc_first_resolution_days,
                 "is_synthetic": False,
                 "source_type": source_type,
             }

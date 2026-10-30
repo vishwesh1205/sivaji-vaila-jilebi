@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Demo Sign In{% endblock %}
+{% block content %}
+<section class="auth-section">
+  <div class="container auth-grid">
+    <div class="auth-intro">
+      <span class="eyebrow eyebrow--light">Demo access only</span>
+      <h1>Explore the grievance workflow without real credentials.</h1>
+      <p class="auth-intro__lede">The reference portal uses registered accounts, passwords, OTPs and CAPTCHAs. This unofficial replica deliberately does not reproduce those mechanisms.</p>
+      <div class="auth-points">
+        <div class="auth-point">
+          <span class="auth-point__icon" aria-hidden="true">1</span>
+          <div><strong>One shared demo identity</strong><p>Continue as <code>Demo Citizen</code>. No password is requested, checked or stored.</p></div>
+        </div>
+        <div class="auth-point">
+          <span class="auth-point__icon" aria-hidden="true">2</span>
+          <div><strong>Local records only</strong><p>Any grievance you submit stays in this project's SQLite database on this machine.</p></div>
+        </div>
+        <div class="auth-point">
+          <span class="auth-point__icon" aria-hidden="true">3</span>
+          <div><strong>Clearly fictional</strong><p>Every reference and response is simulated. No government officer is contacted.</p></div>
+        </div>
+      </div>
+      <div class="auth-alert">
+        <strong>Never enter real government credentials, Aadhaar, PAN, OTPs or CAPTCHA values.</strong>
+        <span>This page has no field for them and will never ask for them.</span>
+      </div>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-card__head">
+        <span class="eyebrow eyebrow--dark">Citizen access</span>
+        <h2>Demo Sign In</h2>
+        <p>Continue into the fictional portal. There is no account verification.</p>
+      </div>
+
+      <div class="demo-identity">
+        <div class="demo-identity__avatar" aria-hidden="true">DC</div>
+        <div>
+          <strong>Demo Citizen</strong>
+          <span class="mono">DEMO-CITIZEN-001</span>
+          <small>demo.citizen@example.test · fictional sample</small>
+        </div>
+        <span class="pill pill--green">Ready</span>
+      </div>
+
+      <form action="/login" method="post" class="stack-form">
+        <input type="hidden" name="next" value="{{ next }}">
+        <button class="btn btn--primary btn--full btn--large" type="submit">
+          Continue as Demo User <span aria-hidden="true">→</span>
+        </button>
+      </form>
+
+      <div class="or-divider"><span>or</span></div>
+
+      <a class="btn btn--outline btn--full" href="/register">Create a fictional demo profile</a>
+      <p class="form-help centered">Registration creates a local demo profile only. It does not create a government account.</p>
+
+      <div class="auth-divider"></div>
+
+      <div class="disabled-reference" aria-label="Government officer login is not implemented">
+        <div class="disabled-reference__head">
+          <span>Government officer login</span>
+          <span class="pill pill--red">Not implemented</span>
+        </div>
+        <p>Password, OTP, CAPTCHA and officer authentication are intentionally absent from this educational demo.</p>
+        <div class="fake-fields" aria-hidden="true">
+          <span class="fake-field">Government username</span>
+          <span class="fake-field">Password / OTP</span>
+          <span class="fake-field">Security code</span>
+        </div>
+      </div>
+
+      <div class="auth-links">
+        <a href="/status">Track an existing demo grievance</a>
+        <a href="/faq">What is simulated?</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content-section content-section--tight">
+  <div class="container">
+    <div class="card try-card">
+      <div>
+        <span class="eyebrow eyebrow--dark">No sign-in required</span>
+        <h2>Try a seeded complaint</h2>
+        <p>These records are preloaded, fictional and safe to explore from the status page.</p>
+      </div>
+      <div class="try-list">
+        <a href="/status/view?ref=CPGRAMS-DEMO-{{ current_year }}-00001&verification=DEMO-CITIZEN-001">
+          <strong>Closed — Demo</strong>
+          <span>CPGRAMS-DEMO-{{ current_year }}-00001</span>
+          <small>Code: DEMO-CITIZEN-001</small>
+        </a>
+        <a href="/status/view?ref=CPGRAMS-DEMO-{{ current_year }}-00002&verification=DEMO-CITIZEN-002">
+          <strong>Under Process — Demo</strong>
+          <span>CPGRAMS-DEMO-{{ current_year }}-00002</span>
+          <small>Code: DEMO-CITIZEN-002</small>
+        </a>
+        <a href="/status/view?ref=CPGRAMS-DEMO-{{ current_year }}-00003&verification=DEMO-CITIZEN-003">
+          <strong>Received — Demo</strong>
+          <span>CPGRAMS-DEMO-{{ current_year }}-00003</span>
+          <small>Code: DEMO-CITIZEN-003</small>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

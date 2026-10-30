@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Page Not Found{% endblock %}
+{% block content %}
+<section class="content-section">
+  <div class="container narrow">
+    <div class="state-card state-card--warning">
+      <div class="state-card__icon" aria-hidden="true">404</div>
+      <span class="eyebrow eyebrow--dark">Not found</span>
+      <h1>That page does not exist in this demo</h1>
+      <p>The requested path{% if requested_path %} <code>{{ requested_path }}</code>{% endif %} is not implemented. This is a local educational project, not the official portal.</p>
+      <div class="state-card__actions">
+        <a class="btn btn--primary" href="/">Return home</a>
+        <a class="btn btn--outline" href="/sitemap">Browse the site map</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Unexpected Demo Error{% endblock %}
+{% block content %}
+<section class="content-section">
+  <div class="container narrow">
+    <div class="state-card state-card--error">
+      <div class="state-card__icon" aria-hidden="true">!</div>
+      <span class="eyebrow eyebrow--dark">Server error</span>
+      <h1>Something went wrong in the local demo</h1>
+      <p>The application encountered an unexpected error. No real government system was contacted. Check the terminal running the server for the local traceback.</p>
+      <div class="state-card__actions">
+        <a class="btn btn--primary" href="/">Return home</a>
+        <a class="btn btn--outline" href="/status">View demo status</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

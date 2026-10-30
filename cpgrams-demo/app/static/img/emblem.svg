@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Neutral demo emblem">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7d0b50"/>
+      <stop offset="1" stop-color="#3c0828"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#g)"/>
+  <circle cx="60" cy="60" r="48" fill="none" stroke="#f3d98b" stroke-width="2"/>
+  <circle cx="60" cy="60" r="42" fill="none" stroke="#ffffff" stroke-opacity=".28" stroke-width="1"/>
+  <path d="M40 33h29l12 12v42H40z" fill="#fff" opacity=".96"/>
+  <path d="M69 33v13h13" fill="#f3d98b"/>
+  <path d="M49 57h23M49 65h23M49 73h14" stroke="#6e0747" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="78" cy="79" r="14" fill="#1f5cff" stroke="#fff" stroke-width="3"/>
+  <path d="M71 79l5 5 9-10" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="60" y="108" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#f3d98b" letter-spacing="2">DEMO</text>
+</svg>

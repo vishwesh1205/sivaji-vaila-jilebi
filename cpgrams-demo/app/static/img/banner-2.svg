@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 540" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071b4a"/>
+      <stop offset=".6" stop-color="#0f2a77"/>
+      <stop offset="1" stop-color="#15174a"/>
+    </linearGradient>
+    <radialGradient id="glow2" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#4f8dff" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#4f8dff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="540" fill="url(#bg2)"/>
+  <circle cx="1210" cy="250" r="300" fill="url(#glow2)"/>
+  <g opacity=".14" stroke="#8fb4ff" stroke-width="1.5">
+    <path d="M0 90h1600M0 190h1600M0 290h1600M0 390h1600M0 490h1600"/>
+    <path d="M980 0v540M1080 0v540M1180 0v540M1280 0v540M1380 0v540M1480 0v540"/>
+  </g>
+  <g transform="translate(1010 100)">
+    <path d="M80 0v330" stroke="#8fb4ff" stroke-opacity=".45" stroke-width="4" stroke-dasharray="2 16" stroke-linecap="round"/>
+    <g>
+      <circle cx="80" cy="18" r="26" fill="#1f5cff" stroke="#fff" stroke-width="6"/>
+      <path d="M69 18l8 8 15-17" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="130" y="0" width="300" height="44" rx="12" fill="#fff" opacity=".92"/>
+      <rect x="148" y="14" width="150" height="7" rx="3.5" fill="#0f2a77"/>
+      <rect x="148" y="28" width="220" height="6" rx="3" fill="#b8c7e6"/>
+    </g>
+    <g transform="translate(0 100)">
+      <circle cx="80" cy="18" r="26" fill="#f0a91b" stroke="#fff" stroke-width="6"/>
+      <path d="M80 7v13l9 6" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="130" y="0" width="300" height="44" rx="12" fill="#fff" opacity=".92"/>
+      <rect x="148" y="14" width="180" height="7" rx="3.5" fill="#0f2a77"/>
+      <rect x="148" y="28" width="200" height="6" rx="3" fill="#b8c7e6"/>
+    </g>
+    <g transform="translate(0 200)">
+      <circle cx="80" cy="18" r="26" fill="#0b7a54" stroke="#fff" stroke-width="6"/>
+      <path d="M67 18h26M80 5v26" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+      <rect x="130" y="0" width="300" height="44" rx="12" fill="#fff" opacity=".92"/>
+      <rect x="148" y="14" width="130" height="7" rx="3.5" fill="#0f2a77"/>
+      <rect x="148" y="28" width="240" height="6" rx="3" fill="#b8c7e6"/>
+    </g>
+    <g transform="translate(0 300)">
+      <circle cx="80" cy="18" r="26" fill="#7a0a4c" stroke="#fff" stroke-width="6"/>
+      <circle cx="80" cy="18" r="7" fill="#fff"/>
+      <rect x="130" y="0" width="300" height="44" rx="12" fill="#fff" opacity=".92"/>
+      <rect x="148" y="14" width="170" height="7" rx="3.5" fill="#0f2a77"/>
+      <rect x="148" y="28" width="190" height="6" rx="3" fill="#b8c7e6"/>
+    </g>
+  </g>
+  <g transform="translate(1400 430)">
+    <rect width="140" height="52" rx="26" fill="#fff" opacity=".1" stroke="#fff" stroke-opacity=".25"/>
+    <text x="70" y="33" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#fff" letter-spacing="3">DEMO</text>
+  </g>
+</svg>

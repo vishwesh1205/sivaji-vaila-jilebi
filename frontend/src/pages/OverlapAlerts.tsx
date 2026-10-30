@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Download, Fingerprint } from 'lucide-react'
+import { Download, Fingerprint, MessageSquare, Send } from 'lucide-react'
 import api from '../lib/api'
 import SourceBadge from '../components/SourceBadge'
 import ProvenanceDrawer from '../components/ProvenanceDrawer'
@@ -27,6 +27,7 @@ export default function OverlapAlerts() {
   const qc = useQueryClient()
   const [expanded, setExpanded] = useState<number | null>(null)
   const [traceCase, setTraceCase] = useState<number | null>(null)
+  const [message, setMessage] = useState('')
   const { data } = useQuery({ queryKey: ['overlaps'], queryFn: async () => (await api.get('/overlaps')).data })
   const { data: detail } = useQuery({ queryKey: ['overlap', expanded], queryFn: async () => (await api.get(`/overlaps/${expanded}`)).data, enabled: !!expanded })
   const sharedTokens = useMemo(() => {
@@ -42,6 +43,13 @@ export default function OverlapAlerts() {
   const review = useMutation({
     mutationFn: async ({ id, reason }: { id: number; reason: string }) => (await api.post(`/overlaps/${id}/review-no-action`, { reason })).data,
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['overlaps'] }); qc.invalidateQueries({ queryKey: ['overlap'] }) },
+  })
+  const postMessage = useMutation({
+    mutationFn: async ({ id, text }: { id: number; text: string }) => (await api.post(`/overlaps/${id}/thread`, { message: text })).data,
+    onSuccess: () => {
+      setMessage('')
+      qc.invalidateQueries({ queryKey: ['overlap', expanded] })
+    },
   })
   const download = async (id: number) => {
     const res = await api.get(`/overlaps/${id}/evidence-pack`, { responseType: 'blob' })
@@ -70,7 +78,8 @@ export default function OverlapAlerts() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="px-2 py-0.5 rounded-full text-xs bg-alert-bg text-alert-text border border-alert-border">{a.status}</span>
-                <button onClick={() => setExpanded(expanded === a.id ? null : a.id)} className="px-3 py-1.5 rounded-lg text-sm border border-card-border">{expanded === a.id ? 'Hide' : 'Open'} cases</button>
+                {a.escalated_at && <span className="px-2 py-0.5 rounded-full text-xs bg-red-50 text-red-700 border border-red-200">ESCALATED TO MANAGEMENT · {a.escalated_at.slice(0, 10)}</span>}
+                <button onClick={() => { setExpanded(expanded === a.id ? null : a.id); setMessage('') }} className="px-3 py-1.5 rounded-lg text-sm border border-card-border">{expanded === a.id ? 'Hide' : 'Open'} cases</button>
                 <button onClick={() => download(a.id)} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm border border-card-border"><Download size={14} /> Evidence PDF</button>
                 <button onClick={() => ack.mutate(a.id)} disabled={ack.isPending} className="px-3 py-1.5 rounded-lg text-sm bg-primary text-white disabled:opacity-50">Acknowledge</button>
                 <button onClick={() => { const reason = window.prompt('Mandatory reason for no coordination action'); if (reason) review.mutate({ id: a.id, reason }) }} className="px-3 py-1.5 rounded-lg text-sm border border-card-border">Reviewed – no action</button>
@@ -97,6 +106,24 @@ export default function OverlapAlerts() {
                   ))}
                 </div>
                 {detail.why_flagged && <div className="text-sm text-muted">Why flagged: {detail.why_flagged}</div>}
+                <div className="border-t border-card-border pt-4 space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-heading"><MessageSquare size={15} /> Coordination thread</div>
+                  <div className="space-y-2">
+                    {detail.thread?.length ? detail.thread.map((entry: any) => (
+                      <div key={entry.id} className="rounded-lg border border-card-border bg-page-bg/50 px-3 py-2">
+                        <div className="text-xs text-muted">{entry.author || 'Unknown user'}{entry.bureau_code ? ` · ${entry.bureau_code}` : ''} · {entry.created_at?.replace('T', ' ').slice(0, 16)}</div>
+                        <div className="text-sm text-heading mt-1 whitespace-pre-wrap">{entry.message}</div>
+                      </div>
+                    )) : <div className="text-sm text-muted">No coordination notes yet.</div>}
+                  </div>
+                  <form onSubmit={(event) => { event.preventDefault(); if (message.trim()) postMessage.mutate({ id: a.id, text: message.trim() }) }} className="space-y-2">
+                    <textarea value={message} onChange={(event) => setMessage(event.target.value)} rows={2} placeholder="Post a coordination note for the involved bureaus…" className="w-full border border-card-border rounded-lg px-3 py-2 text-sm bg-white" />
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-xs text-muted">Visible to all officers handling this alert.</div>
+                      <button type="submit" disabled={!message.trim() || postMessage.isPending} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-white text-sm disabled:opacity-50"><Send size={13} /> {postMessage.isPending ? 'Posting…' : 'Post note'}</button>
+                    </div>
+                  </form>
+                </div>
               </div>
             )}
           </div>

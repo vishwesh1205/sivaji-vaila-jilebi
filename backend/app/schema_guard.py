@@ -20,6 +20,7 @@ CASE_COLUMNS = {
 INSTITUTION_COLUMNS = {
     "is_synthetic": "BOOLEAN DEFAULT TRUE",
     "source_type": "VARCHAR(30) DEFAULT 'SIMULATOR'",
+    "grc_first_resolution_days": "INTEGER",
 }
 
 

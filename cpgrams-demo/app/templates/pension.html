@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Lodge Pension Grievance (Demo State){% endblock %}
+{% block content %}
+<section class="page-hero page-hero--blue compact">
+  <div class="container page-hero__inner">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/grievance/new">Grievance</a><span aria-hidden="true">/</span><span aria-current="page">Pension grievance</span></nav>
+      <span class="eyebrow eyebrow--light">Separate official system</span>
+      <h1>Lodge Pension Grievance</h1>
+      <p>The reference portal redirects pension grievances to a separate Department of Pension &amp; Pensioners' Welfare system. This local demo does not reproduce that integration.</p>
+    </div>
+    <div class="page-hero__badge">DEMO STATE<br><span>NOT IMPLEMENTED</span></div>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="container narrow">
+    <div class="state-card">
+      <div class="state-card__icon" aria-hidden="true">P</div>
+      <span class="eyebrow eyebrow--dark">Explanatory demo state</span>
+      <h2>Pension workflow is outside this replica</h2>
+      <p>On the official site, choosing the pension link opens a separate grievance system. This project intentionally does not invent a pension endpoint, officer directory or transfer process. The navigation item remains functional and opens this clear explanation.</p>
+      <div class="state-card__hints">
+        <h2>What you can do here</h2>
+        <ul class="check-list">
+          <li>Use the public grievance demo for a fictional service complaint.</li>
+          <li>Inspect the simulated public-grievance process flow.</li>
+          <li>Read the official portal's own pension guidance if you need the real service.</li>
+        </ul>
+      </div>
+      <div class="state-card__actions">
+        <a class="btn btn--primary" href="/grievance/new">Lodge a public demo grievance</a>
+        <a class="btn btn--outline" href="/grievance/process">View demo process</a>
+        <a class="btn btn--ghost" href="{{ official_url }}" target="_blank" rel="noopener noreferrer">Official CPGRAMS ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

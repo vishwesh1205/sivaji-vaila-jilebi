@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Site Map{% endblock %}
+{% block content %}
+<section class="page-hero page-hero--navy compact">
+  <div class="container page-hero__inner">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span aria-current="page">Site Map</span></nav>
+      <span class="eyebrow eyebrow--light">Every implemented route</span>
+      <h1>Site map</h1>
+      <p>This demo has no dead navigation links. Every citizen-facing route and local integration endpoint is listed below.</p>
+    </div>
+    <div class="page-hero__badge">WORKING<br><span>LOCAL ROUTES</span></div>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="container">
+    <div class="sitemap-grid">
+      <div class="card">
+        <h2>Citizen flows</h2>
+        <ul class="sitemap-list">
+          <li><a href="/">Home</a><span>Overview, carousel and quick actions</span></li>
+          <li><a href="/login">Demo Sign In</a><span>Continue as Demo User; no credentials</span></li>
+          <li><a href="/register">Demo Registration</a><span>Fictional local profile</span></li>
+          <li><a href="/grievance/new">Lodge Public Grievance</a><span>Validated demo complaint form</span></li>
+          <li><a href="/grievance/pension">Lodge Pension Grievance</a><span>Explanatory demo state</span></li>
+          <li><a href="/grievance/process">Redress Process</a><span>Simulated workflow stages</span></li>
+          <li><a href="/status">View Status</a><span>Reference and verification lookup</span></li>
+          <li><a href="/reminder">Reminder / Clarification</a><span>Append a timeline event</span></li>
+          <li><a href="/feedback">Rate Grievance</a><span>Feedback for a closed demo record</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Information</h2>
+        <ul class="sitemap-list">
+          <li><a href="/about">About the Demo</a><span>Purpose, stack and limitations</span></li>
+          <li><a href="/contact">Contact / Demo Support</a><span>Local message form</span></li>
+          <li><a href="/faq">FAQs / Help</a><span>Seeded values, reset and safety</span></li>
+          <li><a href="/privacy">Privacy &amp; Demo Data</a><span>Storage and data policy</span></li>
+          <li><a href="/disclaimer">Disclaimer</a><span>Unofficial status</span></li>
+          <li><a href="/sitemap">Site Map</a><span>This page</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Local integration</h2>
+        <ul class="sitemap-list">
+          <li><a href="/api/complaints">JSON API</a><span>Read-only local complaint list</span></li>
+          <li><a href="/api/complaints/CPGRAMS-DEMO-{{ current_year }}-00001?verification=DEMO-CITIZEN-001">Single-record API</a><span>Requires a demo verification code</span></li>
+          <li><a href="/export/complaints.json">JSON export</a><span>Download all local demo records</span></li>
+          <li><a href="/export/complaints.csv">CSV export</a><span>Download all local demo records</span></li>
+          <li><a href="/health">Health check</a><span>Application status</span></li>
+        </ul>
+        <p class="small-muted">The optional dashboard adapter is configured through environment variables and is not a public route of this portal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

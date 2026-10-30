@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Demo Redress Process{% endblock %}
+{% block content %}
+<section class="page-hero page-hero--navy compact">
+  <div class="container page-hero__inner">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span aria-current="page">Redress process</span></nav>
+      <span class="eyebrow eyebrow--light">Simulated workflow</span>
+      <h1>Demo Redress Process</h1>
+      <p>How a fictional complaint moves through this application. These stages are illustrative and do not reproduce any real government workflow.</p>
+    </div>
+    <div class="page-hero__badge">ILLUSTRATIVE<br><span>NO REAL OFFICER</span></div>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="container">
+    <div class="process-flow">
+      <div class="process-flow__step">
+        <span class="process-flow__num">01</span>
+        <h2>Lodge</h2>
+        <p>The citizen signs in with the shared demo identity, completes the form and confirms that the submission is fictional.</p>
+        <span class="pill pill--blue">Received — Demo</span>
+      </div>
+      <div class="process-flow__arrow" aria-hidden="true">→</div>
+      <div class="process-flow__step">
+        <span class="process-flow__num">02</span>
+        <h2>Validate and save</h2>
+        <p>The server validates required fields, stores the record in SQLite and allocates a unique reference transactionally.</p>
+        <span class="pill pill--blue">Local persistence</span>
+      </div>
+      <div class="process-flow__arrow" aria-hidden="true">→</div>
+      <div class="process-flow__step">
+        <span class="process-flow__num">03</span>
+        <h2>Review</h2>
+        <p>A seeded or simulated status change appends an event. The status page displays the event history.</p>
+        <span class="pill pill--amber">Under Process — Demo</span>
+      </div>
+      <div class="process-flow__arrow" aria-hidden="true">→</div>
+      <div class="process-flow__step">
+        <span class="process-flow__num">04</span>
+        <h2>Feedback</h2>
+        <p>A closed demo record can receive a local rating. This demonstrates feedback storage without creating a government appeal.</p>
+        <span class="pill pill--green">Closed — Demo</span>
+      </div>
+    </div>
+
+    <div class="two-column process-notes">
+      <div class="card">
+        <h2>What happens to a reminder</h2>
+        <p>A reminder appends a <strong>Reminder</strong> event. An open record moves to <strong>Clarification Received — Demo</strong>; a closed record moves to <strong>Reopened — Demo</strong>.</p>
+      </div>
+      <div class="card">
+        <h2>What never happens</h2>
+        <p>No email is sent, no officer is assigned, no government database is touched, no appeal is created and no legal deadline starts. The entire workflow remains on this machine.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -48,7 +48,7 @@ def list_overlaps(
                 cases = db.scalars(select(models.Case).where(models.Case.id.in_(a.case_ids))).all()
                 if any(c.bureau_id == current.bureau_id for c in cases):
                     filtered.append(a)
-            return [{"id": a.id, "institution_id": a.institution_id, "institution": {"name": a.institution.name, "aicte_permanent_id": a.institution.aicte_permanent_id} if a.institution else None, "case_ids": a.case_ids, "bureaus_involved": a.bureaus_involved, "status": a.status.value, "why_flagged": a.why_flagged, "created_at": a.created_at.isoformat(), "acknowledged_by_json": a.acknowledged_by_json} for a in filtered]
+            return [{"id": a.id, "institution_id": a.institution_id, "institution": {"name": a.institution.name, "aicte_permanent_id": a.institution.aicte_permanent_id} if a.institution else None, "case_ids": a.case_ids, "bureaus_involved": a.bureaus_involved, "status": a.status.value, "why_flagged": a.why_flagged, "created_at": a.created_at.isoformat(), "escalated_at": a.escalated_at.isoformat() if a.escalated_at else None, "acknowledged_by_json": a.acknowledged_by_json} for a in filtered]
         else:
             return []
     alerts = db.scalars(stmt).all()
@@ -62,6 +62,7 @@ def list_overlaps(
             "status": a.status.value,
             "why_flagged": a.why_flagged,
             "created_at": a.created_at.isoformat(),
+            "escalated_at": a.escalated_at.isoformat() if a.escalated_at else None,
             "acknowledged_by_json": a.acknowledged_by_json,
         }
         for a in alerts
@@ -165,7 +166,9 @@ def post_thread(id: int, body: Message, db: Session = Depends(get_db), current: 
     a = db.get(models.OverlapAlert, id)
     if not a:
         raise HTTPException(status_code=404, detail="Alert not found")
-    msg = models.CoordinationMessage(alert_id=a.id, author_id=current.id, bureau_id=current.bureau_id, message=body.message)
+    if not body.message.strip():
+        raise HTTPException(status_code=400, detail="Coordination message cannot be empty")
+    msg = models.CoordinationMessage(alert_id=a.id, author_id=current.id, bureau_id=current.bureau_id, message=body.message.strip())
     db.add(msg)
     db.commit()
     db.refresh(msg)

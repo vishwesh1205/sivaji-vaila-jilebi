@@ -65,9 +65,26 @@ class InstitutionResolver:
                 self.alias_map[normalize_name(a)] = inst
             for ar in inst.alias_rows:
                 self.alias_map[normalize_name(ar.alias)] = inst
+        self.city_names = sorted({i.city for i in self.institutions if i.city}, key=len, reverse=True)
+        self.state_names = sorted({i.state for i in self.institutions if i.state}, key=len, reverse=True)
+
+    def _infer_hints(self, raw_text: str, hints: dict[str, Any]) -> dict[str, Any]:
+        text = unidecode(raw_text or "").lower()
+        inferred = dict(hints)
+        if not inferred.get("city"):
+            for city in self.city_names:
+                if re.search(rf"(?<![a-z]){re.escape(city.lower())}(?![a-z])", text):
+                    inferred["city"] = city
+                    break
+        if not inferred.get("state"):
+            for state in self.state_names:
+                if re.search(rf"(?<![a-z]){re.escape(state.lower())}(?![a-z])", text):
+                    inferred["state"] = state
+                    break
+        return inferred
 
     def resolve(self, raw_text: str, hints: dict[str, Any] | None = None) -> tuple[models.Institution | None, float, list[ResolutionCandidate]]:
-        hints = hints or {}
+        hints = self._infer_hints(raw_text, hints or {})
         aid = extract_aicte_id(raw_text) or hints.get("aicte_permanent_id")
         if aid:
             inst = self.db.scalar(select(models.Institution).where(models.Institution.aicte_permanent_id == aid))
@@ -89,6 +106,13 @@ class InstitutionResolver:
             token_score = fuzz.token_set_ratio(norm, in_norm)
             score += 0.60 * (token_score / 100.0)
             reasons.append(f"token_set:{token_score:.0f}")
+            if in_norm and f" {in_norm} " in f" {norm} ":
+                score += 0.25
+                reasons.append("exact_name_phrase")
+            alias_phrase = any(a_norm and f" {a_norm} " in f" {norm} " for a_norm in (normalize_name(a) for a in (inst.aliases or [])))
+            if alias_phrase:
+                score += 0.20
+                reasons.append("alias_phrase")
             addr_score = fuzz.partial_ratio(normalize_name(raw_text), normalize_name(inst.address))
             score += 0.1 * (addr_score / 100.0)
             if hints.get("city") and inst.city and hints["city"].lower() == inst.city.lower():
@@ -100,7 +124,7 @@ class InstitutionResolver:
             if inst.region and hints.get("region") and inst.region.lower() == hints["region"].lower():
                 score += 0.1
                 reasons.append("region_match")
-            if any(normalize_name(a) and normalize_name(a) in norm for a in (inst.aliases or [])):
+            if not alias_phrase and any(normalize_name(a) and normalize_name(a) in norm for a in (inst.aliases or [])):
                 score += 0.05
                 reasons.append("alias_token")
             score = min(score, 0.99)

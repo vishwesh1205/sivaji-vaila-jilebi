@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.home') }}{% endblock %}
+{% block content %}
+<section class="home-hero">
+  <div class="container">
+    <div class="carousel" data-carousel role="region" aria-roledescription="carousel" aria-label="CPGRAMS demo introduction">
+      <div class="carousel__viewport">
+        <article class="carousel-slide is-active" data-slide role="group" aria-roledescription="slide" aria-label="1 of 3">
+          <img class="carousel-slide__bg" src="/static/img/banner-1.svg" alt="">
+          <div class="carousel-slide__content">
+            <span class="eyebrow">{{ t('home.hero_eyebrow') }}</span>
+            <h2>{{ t('home.hero_title') }}</h2>
+            <p>{{ t('home.hero_text') }}</p>
+            <div class="hero-actions">
+              <a class="btn btn--primary" href="/grievance/new">{{ t('home.hero_lodge') }}</a>
+              <a class="btn btn--outline-light" href="/login">{{ t('home.hero_login') }}</a>
+            </div>
+          </div>
+        </article>
+        <article class="carousel-slide" data-slide role="group" aria-roledescription="slide" aria-label="2 of 3">
+          <img class="carousel-slide__bg" src="/static/img/banner-2.svg" alt="">
+          <div class="carousel-slide__content">
+            <span class="eyebrow">Track every step</span>
+            <h2>A visible event timeline for every demo record.</h2>
+            <p>Use the generated registration number and verification code to see receipt, review, clarification and closure events. All events are simulated.</p>
+            <div class="hero-actions">
+              <a class="btn btn--primary" href="/status">{{ t('home.hero_status') }}</a>
+              <a class="btn btn--outline-light" href="/faq">{{ t('nav.help') }}</a>
+            </div>
+          </div>
+        </article>
+        <article class="carousel-slide" data-slide role="group" aria-roledescription="slide" aria-label="3 of 3">
+          <img class="carousel-slide__bg" src="/static/img/banner-3.svg" alt="">
+          <div class="carousel-slide__content">
+            <span class="eyebrow">Safe by design</span>
+            <h2>No credentials. No OTP. No real government submission.</h2>
+            <p>This demonstration never asks for a government username, password, Aadhaar number, OTP or CAPTCHA. Records stay in a local SQLite database.</p>
+            <div class="hero-actions">
+              <a class="btn btn--primary" href="/about">{{ t('top.about') }}</a>
+              <a class="btn btn--outline-light" href="/privacy">{{ t('footer.privacy') }}</a>
+            </div>
+          </div>
+        </article>
+      </div>
+      <button class="carousel__control carousel__control--prev" type="button" data-carousel-prev aria-label="Previous slide">‹</button>
+      <button class="carousel__control carousel__control--next" type="button" data-carousel-next aria-label="Next slide">›</button>
+      <div class="carousel__indicators" role="group" aria-label="Choose slide">
+        <button type="button" class="is-active" data-carousel-dot aria-label="Go to slide 1" aria-current="true"></button>
+        <button type="button" data-carousel-dot aria-label="Go to slide 2" aria-current="false"></button>
+        <button type="button" data-carousel-dot aria-label="Go to slide 3" aria-current="false"></button>
+      </div>
+      <button class="carousel__pause" type="button" data-carousel-toggle aria-pressed="false" aria-label="Pause automatic slide rotation">Pause</button>
+    </div>
+
+    <div class="notice-bar" role="note">
+      <span class="notice-bar__tag">DEMO</span>
+      <p>{{ t('home.email_notice') }}</p>
+      <a class="notice-bar__link" href="{{ official_url }}" target="_blank" rel="noopener noreferrer">Official portal ↗</a>
+    </div>
+  </div>
+</section>
+
+<section class="quick-section">
+  <div class="container">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow eyebrow--dark">Start here</span>
+        <h2>Primary demo actions</h2>
+      </div>
+      <p>Every action below is implemented and stores demonstration data locally.</p>
+    </div>
+    <div class="quick-grid">
+      <a class="quick-card quick-card--maroon" href="/grievance/new">
+        <span class="quick-card__icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="38" height="38"><path d="M10 6h20l8 8v28H10z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M30 6v9h9M17 23h16M17 30h16M17 37h9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </span>
+        <div>
+          <h3>{{ t('home.quick_lodge_title') }}</h3>
+          <p>{{ t('home.quick_lodge_text') }}</p>
+          <span class="text-link">Open form <span aria-hidden="true">→</span></span>
+        </div>
+      </a>
+      <a class="quick-card quick-card--navy" href="/status">
+        <span class="quick-card__icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="38" height="38"><circle cx="21" cy="21" r="11" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M29 29l9 9M16 21h10M21 16v10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </span>
+        <div>
+          <h3>{{ t('home.quick_status_title') }}</h3>
+          <p>{{ t('home.quick_status_text') }}</p>
+          <span class="text-link">Track a record <span aria-hidden="true">→</span></span>
+        </div>
+      </a>
+      <a class="quick-card quick-card--blue" href="/reminder">
+        <span class="quick-card__icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="38" height="38"><path d="M10 10h28v22H22l-8 7v-7h-4z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M17 19h14M17 25h9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </span>
+        <div>
+          <h3>{{ t('home.quick_reminder_title') }}</h3>
+          <p>{{ t('home.quick_reminder_text') }}</p>
+          <span class="text-link">Add clarification <span aria-hidden="true">→</span></span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="container two-column">
+    <div class="card card--about">
+      <div class="card__head">
+        <span class="eyebrow eyebrow--dark">Context</span>
+        <h2>{{ t('home.about_title') }}</h2>
+      </div>
+      <p>{{ t('home.about_p1') }}</p>
+      <p>{{ t('home.about_p2') }}</p>
+
+      <div class="scope-box">
+        <h3><span class="info-mark" aria-hidden="true">i</span> {{ t('home.scope_title') }}</h3>
+        <p>{{ t('home.scope_intro') }}</p>
+        <ul class="scope-list">
+          <li>{{ t('home.scope_1') }}</li>
+          <li>{{ t('home.scope_2') }}</li>
+          <li>{{ t('home.scope_3') }}</li>
+          <li>{{ t('home.scope_4') }}</li>
+        </ul>
+      </div>
+
+      <div class="process-strip" aria-label="Demo process">
+        <div class="process-step">
+          <span class="process-step__num">1</span>
+          <div><strong>{{ t('home.step1_title') }}</strong><p>{{ t('home.step1_text') }}</p></div>
+        </div>
+        <div class="process-step">
+          <span class="process-step__num">2</span>
+          <div><strong>{{ t('home.step2_title') }}</strong><p>{{ t('home.step2_text') }}</p></div>
+        </div>
+        <div class="process-step">
+          <span class="process-step__num">3</span>
+          <div><strong>{{ t('home.step3_title') }}</strong><p>{{ t('home.step3_text') }}</p></div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="side-stack">
+      <div class="card whats-new">
+        <div class="card__head">
+          <span class="eyebrow eyebrow--dark">Release notes</span>
+          <h2>{{ t('home.whats_new') }}</h2>
+        </div>
+        <ul class="news-list">
+          <li>
+            <span class="news-date"><strong>29</strong><em>Oct {{ current_year }}</em></span>
+            <span>{{ t('home.whats_new_1') }}</span>
+          </li>
+          <li>
+            <span class="news-date"><strong>28</strong><em>Oct {{ current_year }}</em></span>
+            <span>{{ t('home.whats_new_2') }}</span>
+          </li>
+          <li>
+            <span class="news-date"><strong>27</strong><em>Oct {{ current_year }}</em></span>
+            <span>{{ t('home.whats_new_3') }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card seeded-card">
+        <div class="card__head">
+          <span class="eyebrow eyebrow--dark">Ready to test</span>
+          <h2>Seeded demo records</h2>
+        </div>
+        <p class="small-muted">These records are fictional and public within this demo. Use the reference and verification code to explore tracking.</p>
+        <ul class="seeded-list">
+          {% for complaint in recent if complaint.is_seeded %}
+          <li>
+            <div>
+              <strong>{{ complaint.subject }}</strong>
+              <span class="mono">{{ complaint.registration_number }}</span>
+              <span class="mono small-muted">Code: {{ complaint.complainant_ref }}</span>
+            </div>
+            <a class="btn btn--small btn--outline" href="/status/view?ref={{ complaint.registration_number | urlencode }}&verification={{ complaint.complainant_ref | urlencode }}">Open</a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="container cta-panel">
+    <div>
+      <span class="eyebrow">Two-minute walkthrough</span>
+      <h2>{{ t('home.cta_title') }}</h2>
+      <p>{{ t('home.cta_text') }}</p>
+    </div>
+    <div class="cta-panel__actions">
+      <a class="btn btn--light" href="/login">{{ t('home.cta_button') }}</a>
+      <a class="btn btn--outline-light" href="/export/complaints.json">View demo data API</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

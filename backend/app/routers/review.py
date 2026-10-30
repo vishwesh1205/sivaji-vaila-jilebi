@@ -9,6 +9,7 @@ from .. import models
 from ..database import get_db
 from ..dependencies import get_current_user
 from ..hash_chain import compute_hash
+from ..services.evaluation import evaluate_resolution
 from ..services.overlap import OverlapService
 
 router = APIRouter()
@@ -20,6 +21,11 @@ class ConfirmReview(BaseModel):
 
 class RejectReview(BaseModel):
     remarks: str = ""
+
+
+@router.get("/evaluation")
+def resolution_evaluation(limit: int = 240, db: Session = Depends(get_db), current: models.User = Depends(get_current_user)):
+    return evaluate_resolution(db, count=max(200, min(limit, 300)))
 
 
 @router.get("")

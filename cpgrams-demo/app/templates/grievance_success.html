@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Demo Grievance Acknowledged{% endblock %}
+{% block content %}
+<section class="page-hero page-hero--blue">
+  <div class="container page-hero__inner">
+    <div>
+      <span class="eyebrow eyebrow--light">Local acknowledgement</span>
+      <h1>Demo grievance saved</h1>
+      <p>Your fictional complaint is stored in this application's SQLite database. No real government grievance was filed.</p>
+    </div>
+    <div class="success-check" aria-hidden="true">✓</div>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="container success-layout">
+    <div class="card acknowledgement-card">
+      <div class="ack-top">
+        <div>
+          <span class="eyebrow eyebrow--dark">Registration number</span>
+          <div class="ref-line">
+            <strong class="ref-number" id="reference-number">{{ complaint.registration_number }}</strong>
+            <button class="icon-btn" type="button" data-copy-target="reference-number" aria-label="Copy registration number">Copy</button>
+          </div>
+        </div>
+        <span class="status-badge status-badge--{{ complaint.status | status_tone }}">{{ complaint.status }}</span>
+      </div>
+
+      <div class="ack-grid">
+        <div><span>Verification code</span><strong class="mono" id="verification-code">{{ complaint.complainant_ref }}</strong></div>
+        <div><span>Submitted</span><strong>{{ complaint.created_at | dt }}</strong></div>
+        <div><span>Category</span><strong>{{ complaint.category }}</strong></div>
+        <div><span>Demo organisation</span><strong>{{ complaint.organisation }}</strong></div>
+        <div><span>Region</span><strong>{{ complaint.region }}</strong></div>
+        <div><span>Record origin</span><strong>Local demo submission</strong></div>
+      </div>
+
+      <div class="important-box">
+        <strong>Keep these two values for tracking.</strong>
+        <p>The registration number and verification code are both required by the View Status page. They are fictional and are not valid on the official CPGRAMS portal.</p>
+        <button class="btn btn--outline btn--small" type="button" data-copy-pair data-ref="{{ complaint.registration_number }}" data-code="{{ complaint.complainant_ref }}">Copy both values</button>
+      </div>
+
+      <div class="ack-actions">
+        <a class="btn btn--primary" href="/status/view?ref={{ complaint.registration_number | urlencode }}&verification={{ complaint.complainant_ref | urlencode }}">View complaint timeline</a>
+        <a class="btn btn--outline" href="/grievance/new">Lodge another demo grievance</a>
+        <a class="btn btn--ghost" href="/">Return home</a>
+      </div>
+    </div>
+
+    <aside class="side-stack">
+      <div class="card">
+        <h2>Submission summary</h2>
+        <dl class="summary-list">
+          <dt>Subject</dt><dd>{{ complaint.subject }}</dd>
+          <dt>Status</dt><dd>{{ complaint.status }}</dd>
+          <dt>Attachment</dt><dd>{% if complaint.attachment_name %}{{ complaint.attachment_name }}{% else %}None{% endif %}</dd>
+          <dt>Dashboard adapter</dt>
+          <dd>
+            {% if complaint.dashboard_sync_status == 'synced' %}
+            <span class="pill pill--green">Synced to local dashboard</span>
+            {% elif complaint.dashboard_sync_status == 'pending' %}
+            <span class="pill pill--amber">Pending retry</span>
+            {% else %}
+            <span class="pill pill--grey">Not configured</span>
+            {% endif %}
+          </dd>
+        </dl>
+        {% if complaint.dashboard_sync_status == 'pending' %}
+        <p class="small-muted">The optional dashboard did not respond. The local demo record was retained and can be retried with <code>python -m app.dashboard_sync</code>.</p>
+        {% elif complaint.dashboard_sync_status != 'synced' %}
+        <p class="small-muted">No dashboard integration is configured, so this record exists only in the local demo database.</p>
+        {% endif %}
+      </div>
+      <div class="card card--tint">
+        <h2>Reminder</h2>
+        <p class="small-muted">You can add a simulated clarification later. It will be appended to the event history with a timestamp.</p>
+        <a class="text-link" href="/reminder?ref={{ complaint.registration_number | urlencode }}&verification={{ complaint.complainant_ref | urlencode }}">Add a clarification →</a>
+      </div>
+    </aside>
+  </div>
+
+  <div class="container">
+    <div class="card timeline-card">
+      <div class="card__head card__head--border">
+        <div><span class="eyebrow eyebrow--dark">Recorded history</span><h2>Initial timeline</h2></div>
+        <span class="pill pill--blue">{{ events|length }} event{% if events|length != 1 %}s{% endif %}</span>
+      </div>
+      <ol class="timeline">
+        {% for event in events %}
+        <li class="timeline__item">
+          <span class="timeline__dot" aria-hidden="true"></span>
+          <div class="timeline__body">
+            <div class="timeline__head"><strong>{{ event.event_type | event_label }}</strong><time datetime="{{ event.created_at }}">{{ event.created_at | dt }}</time></div>
+            <p>{{ event.description }}</p>
+          </div>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+</section>
+{% endblock %}

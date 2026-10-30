@@ -29,17 +29,23 @@ def sync_job(name: str):
         db.close()
 
 
+def escalate_overlaps(db, now: datetime | None = None) -> int:
+    now = now or datetime.utcnow()
+    cutoff = now - timedelta(days=settings.overlap_escalate_days)
+    alerts = db.query(models.OverlapAlert).filter(models.OverlapAlert.status == models.AlertStatus.OPEN, models.OverlapAlert.escalated_at.is_(None), models.OverlapAlert.created_at <= cutoff).all()
+    for alert in alerts:
+        alert.escalated_at = now
+        users = db.query(models.User).filter(models.User.role.in_([models.UserRole.MANAGEMENT, models.UserRole.ADMIN])).all()
+        for user in users:
+            db.add(models.Notification(user_id=user.id, type=models.NotificationType.ESCALATION, payload={"kind": "overlap_escalation", "alert_id": alert.id, "message": f"Overlap alert {alert.id} unacknowledged for more than {settings.overlap_escalate_days} days"}))
+    db.commit()
+    return len(alerts)
+
+
 def overlap_escalation_job():
     db = SessionLocal()
     try:
-        cutoff = datetime.utcnow() - timedelta(days=settings.overlap_escalate_days)
-        alerts = db.query(models.OverlapAlert).filter(models.OverlapAlert.status == models.AlertStatus.OPEN, models.OverlapAlert.escalated_at.is_(None), models.OverlapAlert.created_at <= cutoff).all()
-        for alert in alerts:
-            alert.escalated_at = datetime.utcnow()
-            users = db.query(models.User).filter(models.User.role.in_([models.UserRole.MANAGEMENT, models.UserRole.ADMIN])).all()
-            for user in users:
-                db.add(models.Notification(user_id=user.id, type=models.NotificationType.ESCALATION, payload={"alert_id": alert.id, "message": f"Overlap alert {alert.id} unacknowledged for more than {settings.overlap_escalate_days} days"}))
-        db.commit()
+        escalate_overlaps(db)
     finally:
         db.close()
 

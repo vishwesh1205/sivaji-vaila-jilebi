@@ -15,6 +15,7 @@ from ..services.resolution import InstitutionResolver
 from ..services.language import detect_language, translate_text
 from ..services.ingestion import detect_cross_channel_duplicates
 from ..services.outcome import find_conflicting_outcomes
+from ..services.precedents import FEEDBACK_VALUES, find_precedents
 from ..connectors.base import hash_identifier
 
 router = APIRouter()
@@ -69,11 +70,26 @@ class LinkCase(BaseModel):
     similarity_score: float = 0.0
 
 
+class PrecedentFeedbackUpdate(BaseModel):
+    feedback: str
+    note: str = ""
+
+
 def _mask_narrative(c: models.Case, current: models.User) -> str:
     if c.category == models.CaseCategory.RAGGING_DISCRIMINATION and not can_see_all(current):
         if c.bureau_id != current.bureau_id and current.role != models.UserRole.ADMIN:
             return "[RESTRICTED - RAGGING/DISCRIMINATION] Access limited to owning bureau per policy. Details masked."
     return c.narrative
+
+
+def _assert_case_scope(case: models.Case, current: models.User) -> None:
+    if can_see_all(current):
+        return
+    if current.role == models.UserRole.REGIONAL_OFFICER and current.region:
+        if not case.institution or case.institution.region != current.region:
+            raise HTTPException(status_code=403, detail="Region scope violation")
+    elif current.bureau_id and case.bureau_id != current.bureau_id:
+        raise HTTPException(status_code=403, detail="Bureau scope violation")
 
 
 @router.get("")
@@ -359,6 +375,113 @@ def get_case(id: int, db: Session = Depends(get_db), current: models.User = Depe
         "is_overdue": (datetime.utcnow() - case.date_received).days >= 90,
         "actions": actions,
         "links": links,
+    }
+
+
+@router.get("/{id}/precedents")
+def get_precedents(
+    id: int,
+    db: Session = Depends(get_db),
+    current: models.User = Depends(get_current_user),
+    limit: int = Query(default=5, ge=1, le=20),
+    min_score: float = Query(default=0.15, ge=0.0, le=1.0),
+    category: str | None = Query(default=None),
+    institution_id: int | None = Query(default=None),
+    language: str | None = Query(default=None),
+    outcome_tag: str | None = Query(default=None),
+    same_category: bool = Query(default=False),
+    same_institution: bool = Query(default=False),
+):
+    case = db.get(models.Case, id)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+    _assert_case_scope(case, current)
+    return find_precedents(
+        db,
+        case,
+        current,
+        limit=limit,
+        min_score=min_score,
+        category=category,
+        institution_id=institution_id,
+        language=language,
+        outcome_tag=outcome_tag,
+        same_category=same_category,
+        same_institution=same_institution,
+    )
+
+
+@router.post("/{id}/precedents/{precedent_case_id}/feedback")
+def set_precedent_feedback(
+    id: int,
+    precedent_case_id: int,
+    body: PrecedentFeedbackUpdate,
+    db: Session = Depends(get_db),
+    current: models.User = Depends(get_current_user),
+):
+    case = db.get(models.Case, id)
+    precedent = db.get(models.Case, precedent_case_id)
+    if not case or not precedent:
+        raise HTTPException(status_code=404, detail="Case not found")
+    if case.id == precedent.id:
+        raise HTTPException(status_code=400, detail="A case cannot be its own precedent")
+    _assert_case_scope(case, current)
+    _assert_case_scope(precedent, current)
+    feedback = body.feedback.strip().upper()
+    if feedback not in FEEDBACK_VALUES:
+        raise HTTPException(status_code=400, detail=f"Feedback must be one of: {', '.join(sorted(FEEDBACK_VALUES))}")
+    row = db.scalar(
+        select(models.PrecedentFeedback).where(
+            models.PrecedentFeedback.case_id == case.id,
+            models.PrecedentFeedback.precedent_case_id == precedent.id,
+            models.PrecedentFeedback.user_id == current.id,
+        )
+    )
+    if row:
+        row.feedback = feedback
+        row.note = body.note.strip() or None
+        row.updated_at = datetime.utcnow()
+    else:
+        row = models.PrecedentFeedback(
+            case_id=case.id,
+            precedent_case_id=precedent.id,
+            user_id=current.id,
+            feedback=feedback,
+            note=body.note.strip() or None,
+        )
+        db.add(row)
+    last = db.scalar(
+        select(models.CaseAction)
+        .where(models.CaseAction.case_id == case.id)
+        .order_by(models.CaseAction.created_at.desc(), models.CaseAction.id.desc())
+        .limit(1)
+    )
+    prev_hash = last.hash if last else "0" * 64
+    payload = {
+        "action": "PRECEDENT_FEEDBACK",
+        "precedent_case_id": precedent.id,
+        "feedback": feedback,
+        "at": datetime.utcnow().isoformat(),
+    }
+    action = models.CaseAction(
+        case_id=case.id,
+        actor_user_id=current.id,
+        bureau_id=case.bureau_id,
+        action_type=models.ActionType.REMARK,
+        remarks=f"Precedent feedback for {precedent.case_id}: {feedback}" + (f" — {body.note.strip()}" if body.note.strip() else ""),
+        prev_hash=prev_hash,
+        hash=compute_hash(prev_hash, payload),
+    )
+    db.add(action)
+    db.commit()
+    db.refresh(row)
+    return {
+        "ok": True,
+        "case_id": case.id,
+        "precedent_case_id": precedent.id,
+        "feedback": row.feedback,
+        "note": row.note,
+        "updated_at": row.updated_at.isoformat(),
     }
 
 

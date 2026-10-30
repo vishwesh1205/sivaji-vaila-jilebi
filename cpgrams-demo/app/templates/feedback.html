@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Rate Grievance (Demo){% endblock %}
+{% block content %}
+<section class="page-hero page-hero--maroon page-hero--compact">
+  <div class="container page-hero__inner">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span aria-current="page">Rate grievance</span></nav>
+      <span class="eyebrow eyebrow--light">Simulated satisfaction feedback</span>
+      <h1>Rate Grievance</h1>
+      <p>Rate a closed demo grievance. The rating is stored locally and appears in the complaint history; it never reaches an officer.</p>
+    </div>
+    <div class="page-hero__badge">FEEDBACK<br><span>LOCAL DATABASE ONLY</span></div>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="container form-layout">
+    <div class="card form-card">
+      <div class="card__head card__head--border">
+        <div><span class="eyebrow eyebrow--dark">Your feedback</span><h2>Rate the demo resolution</h2></div>
+        <span class="required-note">{{ t('form.mandatory') }}</span>
+      </div>
+
+      {% if errors.form %}
+      <div class="alert alert--error" role="alert"><span class="alert__icon" aria-hidden="true">!</span><span>{{ errors.form }}</span></div>
+      {% endif %}
+      {% if errors and not errors.form %}
+      <div class="alert alert--error" role="alert"><span class="alert__icon" aria-hidden="true">!</span><span>Please correct the highlighted fields. Nothing was saved.</span></div>
+      {% endif %}
+
+      {% if complaint %}
+      <div class="matched-record">
+        <div class="matched-record__icon" aria-hidden="true">★</div>
+        <div>
+          <span class="eyebrow eyebrow--dark">Closed demo record</span>
+          <strong>{{ complaint.subject }}</strong>
+          <span class="mono">{{ complaint.registration_number }}</span>
+          <span class="status-badge status-badge--{{ complaint.status | status_tone }}">{{ complaint.status }}</span>
+        </div>
+      </div>
+      {% endif %}
+
+      <form action="/feedback" method="post" class="stack-form" novalidate>
+        <div class="field">
+          <label for="reference">Registration number <span class="req">*</span></label>
+          <input id="reference" name="reference" type="text" value="{{ values.reference }}" placeholder="CPGRAMS-DEMO-{{ current_year }}-00001" autocomplete="off" spellcheck="false" aria-describedby="reference_help {% if errors.reference %}reference_error{% endif %}" {% if errors.reference %}aria-invalid="true"{% endif %} required>
+          <p class="form-help" id="reference_help">Only a record whose status is <strong>Closed — Demo</strong> can be rated.</p>
+          {% if errors.reference %}<p class="field-error" id="reference_error">{{ errors.reference }}</p>{% endif %}
+        </div>
+        <div class="field">
+          <label for="verification">Demo verification code <span class="req">*</span></label>
+          <input id="verification" name="verification" type="text" value="{{ values.verification }}" placeholder="DEMO-CITIZEN-001" autocomplete="off" spellcheck="false" aria-describedby="verification_help {% if errors.verification %}verification_error{% endif %}" {% if errors.verification %}aria-invalid="true"{% endif %} required>
+          <p class="form-help" id="verification_help">The demo complainant reference. Not a government password.</p>
+          {% if errors.verification %}<p class="field-error" id="verification_error">{{ errors.verification }}</p>{% endif %}
+        </div>
+
+        <fieldset class="rating-fieldset">
+          <legend>How satisfied are you with the demo resolution? <span class="req">*</span></legend>
+          <div class="rating-options">
+            {% for value, label in [('1','Very poor'),('2','Poor'),('3','Neutral'),('4','Good'),('5','Excellent')] %}
+            <label class="rating-option">
+              <input type="radio" name="rating" value="{{ value }}" {% if values.rating == value %}checked{% endif %} required>
+              <span class="rating-option__stars" aria-hidden="true">{% for n in range(1, 6) %}<i class="{% if n <= value|int %}is-filled{% endif %}">★</i>{% endfor %}</span>
+              <span class="rating-option__value">{{ value }}</span>
+              <span class="rating-option__label">{{ label }}</span>
+            </label>
+            {% endfor %}
+          </div>
+          {% if errors.rating %}<p class="field-error">{{ errors.rating }}</p>{% endif %}
+        </fieldset>
+
+        <div class="field">
+          <label for="feedback_text">Comments <span class="optional">optional</span></label>
+          <textarea id="feedback_text" name="feedback_text" rows="5" maxlength="1000" aria-describedby="feedback_help feedback_count" placeholder="Describe your fictional experience...">{{ values.feedback_text }}</textarea>
+          <div class="field-meta">
+            <p class="form-help" id="feedback_help">Up to 1,000 characters. Do not include real personal data.</p>
+            <span class="char-count" id="feedback_count" aria-live="polite">{{ values.feedback_text|length }} / 1000</span>
+          </div>
+          {% if errors.feedback_text %}<p class="field-error">{{ errors.feedback_text }}</p>{% endif %}
+        </div>
+
+        <div class="inline-notice inline-notice--amber">
+          <strong>Not an appeal.</strong> This rating does not create a government appeal, reopen a real case or contact any authority. It only demonstrates how feedback could be recorded.
+        </div>
+
+        <div class="form-actions">
+          <a class="btn btn--outline" href="/status">Back to status lookup</a>
+          <button class="btn btn--primary" type="submit">Save demo rating <span aria-hidden="true">→</span></button>
+        </div>
+      </form>
+    </div>
+
+    <aside class="form-aside">
+      <div class="card card--tint">
+        <span class="eyebrow eyebrow--dark">Ready to rate</span>
+        <h2>Seeded closed record</h2>
+        <p class="mono small-muted">CPGRAMS-DEMO-{{ current_year }}-00001<br>DEMO-CITIZEN-001</p>
+        <a class="btn btn--outline btn--full" href="/feedback?ref=CPGRAMS-DEMO-{{ current_year }}-00001&verification=DEMO-CITIZEN-001">Prefill this record</a>
+      </div>
+      <div class="card">
+        <h2>How feedback works</h2>
+        <ul class="check-list">
+          <li>The rating is saved to the local SQLite database.</li>
+          <li>A feedback event is added to the complaint timeline.</li>
+          <li>Submitting again updates the same demo feedback.</li>
+          <li>Nothing is transmitted to the Government of India.</li>
+        </ul>
+      </div>
+      <div class="card card--guidance">
+        <h2>Closed record only</h2>
+        <p class="small-muted">If the selected record is still open, the demo will explain that feedback is not yet available and will not save a rating.</p>
+        <a class="text-link" href="/faq">Read the FAQs →</a>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 540" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#04302e"/>
+      <stop offset=".55" stop-color="#075a55"/>
+      <stop offset="1" stop-color="#0b2a5b"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#d7f2ec"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="540" fill="url(#bg3)"/>
+  <circle cx="1250" cy="260" r="290" fill="#4fd1b0" opacity=".12"/>
+  <g opacity=".13" stroke="#bff3e6" stroke-width="1.5" fill="none">
+    <circle cx="1250" cy="260" r="120"/>
+    <circle cx="1250" cy="260" r="190"/>
+    <circle cx="1250" cy="260" r="260"/>
+    <path d="M900 260h700M1250 0v540"/>
+  </g>
+  <g transform="translate(1080 90)">
+    <path d="M170 0l150 55v140c0 95-64 165-150 205-86-40-150-110-150-205V55z" fill="url(#shield)" opacity=".97"/>
+    <path d="M170 34l112 41v117c0 70-46 124-112 158-66-34-112-88-112-158V75z" fill="#0b7a54" opacity=".09"/>
+    <rect x="135" y="112" width="70" height="86" rx="10" fill="#0b7a54"/>
+    <path d="M150 112V96a20 20 0 0140 0v16" fill="none" stroke="#0b7a54" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="170" cy="150" r="9" fill="#fff"/>
+    <path d="M170 150v20" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(940 380)">
+    <rect width="220" height="70" rx="16" fill="#fff" opacity=".12" stroke="#fff" stroke-opacity=".25"/>
+    <circle cx="36" cy="35" r="14" fill="#4fd1b0"/>
+    <rect x="62" y="24" width="120" height="7" rx="3.5" fill="#fff" opacity=".8"/>
+    <rect x="62" y="40" width="80" height="6" rx="3" fill="#fff" opacity=".45"/>
+  </g>
+  <g transform="translate(1400 90)">
+    <rect width="140" height="52" rx="26" fill="#fff" opacity=".12" stroke="#fff" stroke-opacity=".3"/>
+    <text x="70" y="33" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#fff" letter-spacing="3">DEMO</text>
+  </g>
+</svg>

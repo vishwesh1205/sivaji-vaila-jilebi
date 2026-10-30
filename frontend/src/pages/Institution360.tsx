@@ -41,11 +41,12 @@ export default function Institution360() {
           <Download size={16} /> {downloading ? 'Building…' : 'Institution brief PDF'}
         </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
         <div className="bg-card-bg border border-card-border rounded-card p-4"><div className="text-sm text-muted">Total Cases</div><div className="text-xl font-semibold">{data.regulatory_posture.total_cases}</div></div>
         <div className="bg-card-bg border border-card-border rounded-card p-4"><div className="text-sm text-muted">Active</div><div className="text-xl font-semibold">{data.regulatory_posture.active}</div></div>
         <div className="bg-card-bg border border-card-border rounded-card p-4"><div className="text-sm text-muted">Disposed</div><div className="text-xl font-semibold">{data.regulatory_posture.disposed}</div></div>
         <div className="bg-card-bg border border-card-border rounded-card p-4"><div className="text-sm text-muted">Overlap Alerts</div><div className="text-xl font-semibold">{data.regulatory_posture.overlap_alerts}</div></div>
+        <div className="bg-card-bg border border-card-border rounded-card p-4"><div className="text-sm text-muted">First GRC resolution</div><div className="text-xl font-semibold">{data.institution.grc_first_resolution_days != null ? `${data.institution.grc_first_resolution_days} days` : 'Unknown'}</div></div>
         <div className="bg-card-bg border border-card-border rounded-card p-4 flex items-center gap-3"><RiskGauge score={data.risk.score} size={62} /><div><div className="text-sm text-muted">Risk score</div><div className="text-xs text-muted">Transparent weighted</div></div></div>
       </div>
       <div className="bg-card-bg border border-card-border rounded-card">

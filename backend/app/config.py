@@ -24,7 +24,6 @@ class Settings(BaseSettings):
     seed_demo: bool = True
     seed_random_seed: int = 20261025
     seed_use_llm: bool = False
-    use_sentence_transformers: bool = False
 
     # Connectors / provenance
     source_mode_css: str = "simulator"

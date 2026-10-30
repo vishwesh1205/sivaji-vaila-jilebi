@@ -55,6 +55,7 @@ export default function Dashboard() {
             <div className="font-medium text-heading">Last 24h source proof</div>
             <div className="text-muted">CSS <span className="text-heading font-medium">{proof.css}</span> <SourceBadge type="SIMULATOR" compact /></div>
             <div className="text-muted">CPGRAMS <span className="text-heading font-medium">{proof.cpgrams}</span> <SourceBadge type="SIMULATOR" compact /></div>
+            <div className="text-muted">CPGRAMS demo <span className="text-heading font-medium">{proof.cpgrams_demo}</span> <SourceBadge type="SIMULATOR" compact /></div>
             <div className="text-muted">Seed <span className="text-heading font-medium">{proof.seed_simulator}</span> <SourceBadge type="SIMULATOR" compact /></div>
             <div className="text-muted">Manual <span className="text-heading font-medium">{proof.manual}</span></div>
             <div className="text-muted">Public stats <span className="text-heading font-medium">{proof.public_stats_mode}</span></div>

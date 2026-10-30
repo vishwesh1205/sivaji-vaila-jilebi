@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 540" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#530532"/>
+      <stop offset=".55" stop-color="#7a0a4c"/>
+      <stop offset="1" stop-color="#3a1d6e"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#efe6f2"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".2"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="540" fill="url(#bg)"/>
+  <circle cx="1180" cy="190" r="260" fill="url(#glow)"/>
+  <circle cx="1250" cy="430" r="170" fill="#1f5cff" opacity=".18"/>
+  <g opacity=".13" stroke="#fff" stroke-width="2">
+    <path d="M0 110h1600M0 220h1600M0 330h1600M0 440h1600"/>
+    <path d="M1100 0v540M1280 0v540M1460 0v540"/>
+  </g>
+  <g transform="translate(1040 78) rotate(4)">
+    <rect x="0" y="0" width="300" height="380" rx="20" fill="#000" opacity=".18" transform="translate(14 18)"/>
+    <rect x="0" y="0" width="300" height="380" rx="20" fill="url(#paper)"/>
+    <rect x="24" y="26" width="150" height="14" rx="7" fill="#6e0747" opacity=".8"/>
+    <rect x="24" y="58" width="252" height="8" rx="4" fill="#9a8fa3"/>
+    <rect x="24" y="78" width="214" height="8" rx="4" fill="#c3b9c9"/>
+    <rect x="24" y="98" width="238" height="8" rx="4" fill="#c3b9c9"/>
+    <rect x="24" y="130" width="252" height="52" rx="10" fill="#f3edf6"/>
+    <circle cx="52" cy="156" r="12" fill="#1f5cff" opacity=".8"/>
+    <rect x="74" y="146" width="150" height="8" rx="4" fill="#8c7f95"/>
+    <rect x="74" y="164" width="110" height="8" rx="4" fill="#c3b9c9"/>
+    <rect x="24" y="204" width="252" height="8" rx="4" fill="#c3b9c9"/>
+    <rect x="24" y="224" width="224" height="8" rx="4" fill="#c3b9c9"/>
+    <rect x="24" y="244" width="242" height="8" rx="4" fill="#c3b9c9"/>
+    <circle cx="230" cy="318" r="42" fill="#0b7a54"/>
+    <path d="M210 318l14 14 27-31" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g transform="translate(1400 120)">
+    <rect width="140" height="52" rx="26" fill="#fff" opacity=".12" stroke="#fff" stroke-opacity=".3"/>
+    <text x="70" y="33" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#fff" letter-spacing="3">DEMO</text>
+  </g>
+  <g transform="translate(1390 360)">
+    <rect width="150" height="110" rx="16" fill="#fff" opacity=".1"/>
+    <path d="M28 32h94M28 55h94M28 78h58" stroke="#fff" stroke-opacity=".6" stroke-width="7" stroke-linecap="round"/>
+  </g>
+</svg>

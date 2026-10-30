@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Activity, Database, RefreshCw, Zap } from 'lucide-react'
-import api from '../lib/api'
+import api, { apiUrl } from '../lib/api'
 import SourceBadge from '../components/SourceBadge'
 
 type FeedEvent = { type?: string; message?: string; source_name?: string; source_type?: string; at?: string }
@@ -20,7 +20,7 @@ export default function DataSources() {
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
-    const es = new EventSource(`/api/events/stream?token=${encodeURIComponent(token)}`)
+    const es = new EventSource(apiUrl(`/events/stream?token=${encodeURIComponent(token)}`))
     es.onmessage = (event) => {
       try {
         const parsed = JSON.parse(event.data)

@@ -38,6 +38,41 @@ COLLEGE_NAMES = [
     "Institute of Management and Technology",
 ]
 
+HERO_CASE_DETAILS = {
+    "PG-2026-4471": {
+        "subject": "Excess semester fee charged beyond the approved structure",
+        "category_subtype": "EXCESS_FEE",
+        "complainant_type": "STUDENT",
+    },
+    "RB-2026-0892": {
+        "subject": "Admissions beyond approved intake in engineering branches",
+        "category_subtype": "BEYOND_INTAKE",
+        "complainant_type": "REGIONAL_OFFICE_REPORT",
+    },
+    "ML-2026-0001": {
+        "subject": "Excess fee charged for the current academic year, refund requested",
+        "category_subtype": "EXCESS_FEE",
+        "complainant_type": "STUDENT",
+    },
+    "REV-2026-0001": {
+        "subject": "Fee collection above approved structure; institution confirmation pending",
+        "category_subtype": "EXCESS_FEE",
+        "complainant_type": "ANONYMOUS_WELLWISHER",
+    },
+}
+
+
+def backfill_hero_case_details(db: Session) -> None:
+    """Keep the four demo cases realistic in databases seeded before Part 3."""
+    for case_id, details in HERO_CASE_DETAILS.items():
+        case = db.query(models.Case).filter_by(case_id=case_id).first()
+        if not case:
+            continue
+        for field, value in details.items():
+            if not getattr(case, field, None):
+                setattr(case, field, value)
+    db.commit()
+
 
 def ensure_part2_seed(db: Session):
     """Idempotent additions for Part 2: honest provenance + a visible demo spike."""
@@ -46,6 +81,9 @@ def ensure_part2_seed(db: Session):
     # Existing databases predate provenance columns: label them honestly.
     db.query(models.Case).filter(models.Case.source_name.is_(None)).update({"source_name": "seed", "source_type": "SIMULATOR"}, synchronize_session=False)
     db.query(models.Institution).filter(models.Institution.is_synthetic.is_(None)).update({"is_synthetic": True}, synchronize_session=False)
+    hero_institution = db.query(models.Institution).filter_by(aicte_permanent_id="1-3538633").first()
+    if hero_institution and hero_institution.grc_first_resolution_days is None:
+        hero_institution.grc_first_resolution_days = 6
     db.commit()
     rb_hero = db.query(models.Case).filter_by(case_id="RB-2026-0892").first()
     if rb_hero and rb_hero.outcome_tag is None:
@@ -68,6 +106,9 @@ def ensure_part2_seed(db: Session):
                 institution_id=hero.id,
                 raw_institution_text=hero.name,
                 category=models.CaseCategory.FEE,
+                subject=HERO_CASE_DETAILS["ML-2026-0001"]["subject"],
+                category_subtype=HERO_CASE_DETAILS["ML-2026-0001"]["category_subtype"],
+                complainant_type=HERO_CASE_DETAILS["ML-2026-0001"]["complainant_type"],
                 narrative="Excess fee was charged for the current academic year; the student requests an inquiry and refund.",
                 status=models.CaseStatus.PENDING,
                 bureau_id=pgrc.id,
@@ -102,6 +143,9 @@ def ensure_part2_seed(db: Session):
                 institution_id=None,
                 raw_institution_text="Xavier Institute of Technology and Management, Mumbai",
                 category=models.CaseCategory.FEE,
+                subject=HERO_CASE_DETAILS["REV-2026-0001"]["subject"],
+                category_subtype=HERO_CASE_DETAILS["REV-2026-0001"]["category_subtype"],
+                complainant_type=HERO_CASE_DETAILS["REV-2026-0001"]["complainant_type"],
                 narrative="Fee collection above the approved structure; institution name requires manual confirmation.",
                 status=models.CaseStatus.PENDING,
                 bureau_id=rb.id,
@@ -129,6 +173,8 @@ def ensure_part2_seed(db: Session):
                 status=models.ReviewStatus.OPEN,
             ))
             db.commit()
+
+    backfill_hero_case_details(db)
 
     existing = db.query(models.Case).filter(models.Case.case_id.like("EMRG-2026-%")).count()
     if existing == 0:
@@ -227,6 +273,7 @@ def run():
                 approval_status="Approved",
                 programme_mix=["B.Tech", "M.Tech"],
                 aliases=["St Xavier Institute of Technology", "St. Xaviers Institute of Technology", "Xavier Institute of Technology"],
+                grc_first_resolution_days=6,
                 is_synthetic=True,
                 source_type="SIMULATOR",
             )
@@ -282,6 +329,9 @@ def run():
                 institution_id=hero.id,
                 raw_institution_text="St. Xavier Institute of Technology, Mumbai",
                 category=models.CaseCategory.FEE,
+                subject=HERO_CASE_DETAILS["PG-2026-4471"]["subject"],
+                category_subtype=HERO_CASE_DETAILS["PG-2026-4471"]["category_subtype"],
+                complainant_type=HERO_CASE_DETAILS["PG-2026-4471"]["complainant_type"],
                 narrative="Excessive fee charged beyond approved structure for the academic year 2025-26 despite AICTE fee fixation guidelines. Student has submitted fee receipts and demand notices.",
                 status=models.CaseStatus.UNDER_PROCESS,
                 bureau_id=pgrc.id,
@@ -307,6 +357,9 @@ def run():
                 institution_id=hero.id,
                 raw_institution_text="St Xaviers Inst of Tech",
                 category=models.CaseCategory.APPROVAL_VIOLATION,
+                subject=HERO_CASE_DETAILS["RB-2026-0892"]["subject"],
+                category_subtype=HERO_CASE_DETAILS["RB-2026-0892"]["category_subtype"],
+                complainant_type=HERO_CASE_DETAILS["RB-2026-0892"]["complainant_type"],
                 narrative="Alleged unauthorized intake beyond approved seats in multiple engineering branches. Inspection report references violation of approval conditions and needs verification.",
                 status=models.CaseStatus.PENDING,
                 bureau_id=rb.id,

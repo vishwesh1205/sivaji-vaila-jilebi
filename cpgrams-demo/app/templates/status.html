@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}View Grievance Status{% endblock %}
+{% block content %}
+<section class="page-hero page-hero--navy page-hero--compact">
+  <div class="container page-hero__inner">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span aria-current="page">View status</span></nav>
+      <span class="eyebrow eyebrow--light">Demo tracking</span>
+      <h1>View Grievance Status</h1>
+      <p>Look up a local demonstration record and inspect its simulated event timeline.</p>
+    </div>
+    <div class="page-hero__badge">NOT THE REAL<br><span>CPGRAMS STATUS SERVICE</span></div>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="container form-layout">
+    <div class="card form-card card--reference">
+      <div class="card__head card__head--border">
+        <div>
+          <span class="eyebrow eyebrow--dark">Citizen lookup</span>
+          <h2>Enter demo reference details</h2>
+        </div>
+        <span class="required-note">{{ t('form.mandatory') }}</span>
+      </div>
+
+      {% if errors.form %}
+      <div class="alert alert--error" role="alert">
+        <span class="alert__icon" aria-hidden="true">!</span>
+        <span>{{ errors.form }}</span>
+      </div>
+      {% endif %}
+
+      <form action="/status" method="post" class="stack-form" novalidate>
+        <div class="field">
+          <label for="registration">Registration number <span class="req">*</span></label>
+          <input id="registration" name="registration" type="text" value="{{ values.registration }}" placeholder="CPGRAMS-DEMO-{{ current_year }}-00001" autocomplete="off" spellcheck="false" aria-describedby="registration_help {% if errors.registration %}registration_error{% endif %}" {% if errors.registration %}aria-invalid="true"{% endif %} required>
+          <p class="form-help" id="registration_help">The reference generated when a demo grievance was submitted. Format: <code>CPGRAMS-DEMO-{{ current_year }}-00001</code>.</p>
+          {% if errors.registration %}<p class="field-error" id="registration_error">{{ errors.registration }}</p>{% endif %}
+        </div>
+
+        <div class="field">
+          <label for="verification">Demo verification code <span class="req">*</span></label>
+          <input id="verification" name="verification" type="text" value="{{ values.verification }}" placeholder="DEMO-CITIZEN-001" autocomplete="off" spellcheck="false" aria-describedby="verification_help {% if errors.verification %}verification_error{% endif %}" {% if errors.verification %}aria-invalid="true"{% endif %} required>
+          <p class="form-help" id="verification_help">This is the demo complainant reference shown on the acknowledgement page. It is not a government password, OTP or CAPTCHA.</p>
+          {% if errors.verification %}<p class="field-error" id="verification_error">{{ errors.verification }}</p>{% endif %}
+        </div>
+
+        <div class="reference-note">
+          <strong>Reference layout note:</strong> the real portal asks for a grievance password or registered email/mobile plus a security code. This demo replaces those with a local verification code so that no real credentials are collected.
+        </div>
+
+        <div class="form-actions">
+          <a class="btn btn--outline" href="/">Back home</a>
+          <button class="btn btn--primary" type="submit">Proceed <span aria-hidden="true">→</span></button>
+        </div>
+      </form>
+    </div>
+
+    <aside class="form-aside">
+      <div class="card card--tint">
+        <span class="eyebrow eyebrow--dark">Try a seeded record</span>
+        <h2>Fictional examples</h2>
+        <ul class="example-list">
+          <li>
+            <strong>Closed — Demo</strong>
+            <span class="mono">CPGRAMS-DEMO-{{ current_year }}-00001</span>
+            <span class="mono small-muted">DEMO-CITIZEN-001</span>
+            <a class="text-link" href="/status/view?ref=CPGRAMS-DEMO-{{ current_year }}-00001&verification=DEMO-CITIZEN-001">Open record →</a>
+          </li>
+          <li>
+            <strong>Under Process — Demo</strong>
+            <span class="mono">CPGRAMS-DEMO-{{ current_year }}-00002</span>
+            <span class="mono small-muted">DEMO-CITIZEN-002</span>
+            <a class="text-link" href="/status/view?ref=CPGRAMS-DEMO-{{ current_year }}-00002&verification=DEMO-CITIZEN-002">Open record →</a>
+          </li>
+          <li>
+            <strong>Received — Demo</strong>
+            <span class="mono">CPGRAMS-DEMO-{{ current_year }}-00003</span>
+            <span class="mono small-muted">DEMO-CITIZEN-003</span>
+            <a class="text-link" href="/status/view?ref=CPGRAMS-DEMO-{{ current_year }}-00003&verification=DEMO-CITIZEN-003">Open record →</a>
+          </li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Unknown reference?</h2>
+        <p class="small-muted">The page will explain that no local record matched. It will never query the real CPGRAMS status service.</p>
+        <a class="text-link" href="/faq">Read the demo FAQs →</a>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

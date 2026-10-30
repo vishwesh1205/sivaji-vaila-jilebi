@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Demo Registration{% endblock %}
+{% block content %}
+<section class="page-hero page-hero--maroon">
+  <div class="container page-hero__inner">
+    <div>
+      <span class="eyebrow eyebrow--light">Fictional profile</span>
+      <h1>Create a demo profile</h1>
+      <p>This form creates a local demonstration identity only. It does not create a government account and does not request a password.</p>
+    </div>
+    <div class="page-hero__badge">NO PASSWORD<br><span>NO OTP · NO CAPTCHA</span></div>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="container form-layout">
+    <div class="card form-card">
+      <div class="card__head card__head--border">
+        <div>
+          <span class="eyebrow eyebrow--dark">Demo registration</span>
+          <h2>Your fictional details</h2>
+        </div>
+        <span class="pill pill--amber">Sample data only</span>
+      </div>
+
+      {% if errors %}
+      <div class="alert alert--error" role="alert">
+        <span class="alert__icon" aria-hidden="true">!</span>
+        <span>Please correct the highlighted fields. Nothing was saved.</span>
+      </div>
+      {% endif %}
+
+      <form action="/register" method="post" class="stack-form" novalidate>
+        <div class="field-grid">
+          <div class="field">
+            <label for="display_name">Display name <span class="req">*</span></label>
+            <input id="display_name" name="display_name" type="text" maxlength="80" autocomplete="off" value="{{ values.display_name or '' }}" aria-describedby="display_name_help {% if errors.display_name %}display_name_error{% endif %}" {% if errors.display_name %}aria-invalid="true"{% endif %} required>
+            <p class="form-help" id="display_name_help">Use any fictional name. Do not enter a real government username.</p>
+            {% if errors.display_name %}<p class="field-error" id="display_name_error">{{ errors.display_name }}</p>{% endif %}
+          </div>
+          <div class="field">
+            <label for="email">Demo email address <span class="req">*</span></label>
+            <input id="email" name="email" type="email" maxlength="120" autocomplete="off" value="{{ values.email or '' }}" placeholder="name@example.test" aria-describedby="email_help {% if errors.email %}email_error{% endif %}" {% if errors.email %}aria-invalid="true"{% endif %} required>
+            <p class="form-help" id="email_help">A fictional address such as <code>citizen@example.test</code>. It is not verified.</p>
+            {% if errors.email %}<p class="field-error" id="email_error">{{ errors.email }}</p>{% endif %}
+          </div>
+          <div class="field field--span2">
+            <label for="state">Demo state / region <span class="req">*</span></label>
+            <select id="state" name="state" aria-describedby="state_help {% if errors.state %}state_error{% endif %}" {% if errors.state %}aria-invalid="true"{% endif %} required>
+              <option value="">Select a region</option>
+              {% for region in regions %}
+              <option value="{{ region }}" {% if values.state == region %}selected{% endif %}>{{ region }}</option>
+              {% endfor %}
+            </select>
+            <p class="form-help" id="state_help">Used only to prefill the demo grievance form.</p>
+            {% if errors.state %}<p class="field-error" id="state_error">{{ errors.state }}</p>{% endif %}
+          </div>
+        </div>
+
+        <div class="inline-notice">
+          <strong>No password field.</strong> This demo intentionally avoids passwords, OTPs and CAPTCHA values. Registration simply sets a local session cookie.
+        </div>
+
+        <div class="form-actions">
+          <a class="btn btn--outline" href="/login">Back to demo sign in</a>
+          <button class="btn btn--primary" type="submit">Create demo profile <span aria-hidden="true">→</span></button>
+        </div>
+      </form>
+    </div>
+
+    <aside class="form-aside">
+      <div class="card">
+        <h2>What gets stored</h2>
+        <ul class="check-list">
+          <li>Your fictional display name</li>
+          <li>A demo-only email address</li>
+          <li>A selected demo region</li>
+          <li>A generated demo account reference</li>
+        </ul>
+        <p class="small-muted">The local SQLite database stores these values. No password, OTP, Aadhaar, PAN or CAPTCHA response is collected.</p>
+      </div>
+      <div class="card card--tint">
+        <h2>Prefer no registration?</h2>
+        <p>Use the shared Demo Citizen account from the sign-in page. It is the fastest way to test the full workflow.</p>
+        <a class="btn btn--primary btn--full" href="/login">Continue as Demo User</a>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

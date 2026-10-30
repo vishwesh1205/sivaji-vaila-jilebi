@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}FAQs / Help{% endblock %}
+{% block content %}
+<section class="page-hero page-hero--blue compact">
+  <div class="container page-hero__inner">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span aria-current="page">FAQs / Help</span></nav>
+      <span class="eyebrow eyebrow--light">Help centre</span>
+      <h1>Frequently asked questions</h1>
+      <p>How the educational demo works, what is simulated, and which values are safe to use.</p>
+    </div>
+    <div class="page-hero__badge">DEMO HELP<br><span>NOT OFFICIAL GUIDANCE</span></div>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="container faq-layout">
+    <div class="faq-main">
+      <div class="card">
+        <details class="faq-item" open>
+          <summary>Is this the official CPGRAMS website?</summary>
+          <div><p>No. This is an unofficial, student-built educational replica. It is not connected to the Government of India, DARPG, NIC or any ministry. No real grievance is filed and no government officer receives anything you submit.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>Can I file a real complaint here?</summary>
+          <div><p>No. The forms accept fictional demonstration data only. For a real complaint, use the official CPGRAMS portal at <a href="{{ official_url }}" target="_blank" rel="noopener noreferrer">pgportal.gov.in</a>.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>What credentials does the demo request?</summary>
+          <div><p>None. The demo never asks for a government username, password, Aadhaar, PAN, OTP, CAPTCHA value or other real credential. The sign-in page only offers a shared "Demo Citizen" session. If any page asks for those values, do not enter them.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>How do I get a demo registration number?</summary>
+          <div><p>Continue as a Demo User, open <a href="/grievance/new">Lodge Public Grievance</a>, complete the required fields and submit. The acknowledgement page displays a reference such as <code>CPGRAMS-DEMO-{{ current_year }}-00004</code> and a verification code. Both are required by the status page.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>How do I track a grievance?</summary>
+          <div><p>Open <a href="/status">View Status</a> and enter both the registration number and verification code. The page shows the stored details and the full simulated event timeline.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>What are the seeded demo records?</summary>
+          <div>
+            <p>The database starts with three fictional records. They are safe to explore:</p>
+            <ul class="plain-list mono">
+              <li>CPGRAMS-DEMO-{{ current_year }}-00001 · DEMO-CITIZEN-001 · Closed</li>
+              <li>CPGRAMS-DEMO-{{ current_year }}-00002 · DEMO-CITIZEN-002 · Under process</li>
+              <li>CPGRAMS-DEMO-{{ current_year }}-00003 · DEMO-CITIZEN-003 · Received</li>
+            </ul>
+            <p>Seeding runs only when the complaint table is empty, so normal startup does not overwrite user-created records.</p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>How do reminders and feedback work?</summary>
+          <div><p>A reminder or clarification appends a <strong>Reminder</strong> event to the local timeline. Feedback appends a <strong>Feedback</strong> event and stores the rating. Neither action reaches a government officer, creates an appeal or changes a real case.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>Where is my data stored?</summary>
+          <div><p>In a local SQLite file, by default <code>cpgrams-demo/data/cpgrams_demo.db</code>. Attachments are stored under a random name in <code>cpgrams-demo/data/uploads</code>. Nothing is uploaded to a third party unless the optional dashboard adapter is explicitly configured by the operator.</p><p>Read the <a href="/privacy">demo data policy</a>.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>How do I reset the demo?</summary>
+          <div><p>Stop the server and run <code>cd cpgrams-demo &amp;&amp; python -m app.seed --reset</code>. This deletes all demo complaints, events, feedback, users and messages, then recreates the three seeded records. It is destructive by design.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>Are all languages translated?</summary>
+          <div><p>English, Hindi and Tamil have full core translations for navigation and essential messages. The selector lists the reference portal's language set, but unsupported languages clearly fall back to English rather than pretending to be fully translated.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>Does the dashboard integration work?</summary>
+          <div><p>An optional adapter is included for the existing local complaint-intelligence dashboard's authenticated <code>POST /ingest/json</code> contract. It is disabled unless <code>DASHBOARD_INGEST_URL</code> and a token are configured. Failures never delete the local record. See the README for setup and limitations.</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>Why does the interface look like the official site?</summary>
+          <div><p>The layout is intentionally reference-inspired for interface research. The title, emblem, disclaimers, colours and copy are original or neutral, and every page states that this is an unofficial demo. No government logo or official identity credential is reproduced.</p></div>
+        </details>
+      </div>
+    </div>
+    <aside class="side-stack">
+      <div class="card card--tint">
+        <h2>Quick help</h2>
+        <div class="stacked-links">
+          <a class="text-link" href="/grievance/new">Lodge a demo grievance →</a>
+          <a class="text-link" href="/status">View demo status →</a>
+          <a class="text-link" href="/reminder">Add a clarification →</a>
+          <a class="text-link" href="/feedback">Rate a closed record →</a>
+          <a class="text-link" href="/contact">Contact the demo project →</a>
+        </div>
+      </div>
+      <div class="card card--guidance">
+        <h2>Safety reminder</h2>
+        <p class="small-muted">This project is not suitable for real personal data. Do not enter real names, addresses, Aadhaar/PAN numbers, phone numbers, passwords or OTPs.</p>
+      </div>
+      <div class="card">
+        <h2>Official portal</h2>
+        <p class="small-muted">For a real grievance or official guidance, visit the Government of India portal.</p>
+        <a class="btn btn--outline btn--full" href="{{ official_url }}" target="_blank" rel="noopener noreferrer">pgportal.gov.in ↗</a>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

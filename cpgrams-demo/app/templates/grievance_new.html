@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}Lodge Public Grievance (Demo){% endblock %}
+{% block content %}
+<section class="page-hero page-hero--maroon">
+  <div class="container page-hero__inner">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/grievance/new">Grievance</a><span aria-hidden="true">/</span><span aria-current="page">Lodge public grievance</span></nav>
+      <span class="eyebrow eyebrow--light">Demo complaint form</span>
+      <h1>Lodge a Public Grievance</h1>
+      <p>Submit a clearly fictional complaint to the local demonstration database. No ministry, department or government officer receives it.</p>
+    </div>
+    <div class="page-hero__badge">DEMO RECORD<br><span>LOCAL DATABASE ONLY</span></div>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="container form-layout form-layout--wide">
+    <div class="card form-card">
+      <div class="card__head card__head--border">
+        <div>
+          <span class="eyebrow eyebrow--dark">Grievance details</span>
+          <h2>Fictional complaint</h2>
+        </div>
+        <span class="required-note">{{ t('form.mandatory') }}</span>
+      </div>
+
+      {% if errors.form %}
+      <div class="alert alert--error" role="alert">
+        <span class="alert__icon" aria-hidden="true">!</span>
+        <span>{{ errors.form }}</span>
+      </div>
+      {% endif %}
+
+      {% if errors %}
+      <div class="error-summary" role="alert" aria-labelledby="error-summary-title">
+        <h2 id="error-summary-title">There is a problem with this form</h2>
+        <ul>
+          {% for field, message in errors.items() if field != 'form' %}
+          <li><a href="#{{ field }}">{{ message }}</a></li>
+          {% endfor %}
+        </ul>
+        <p>Nothing was saved. Correct the fields and submit again.</p>
+      </div>
+      {% endif %}
+
+      <form action="/grievance/new" method="post" enctype="multipart/form-data" class="stack-form" data-complaint-form>
+        <input type="hidden" name="form_token" value="{{ token }}">
+        <input type="hidden" name="idempotency_hint" value="one-reference-per-form-token">
+
+        <fieldset class="form-section">
+          <legend><span class="legend-num">1</span> Complainant reference</legend>
+          <div class="field-grid">
+            <div class="field field--span2">
+              <label for="complainant_ref">Demo complainant reference <span class="req">*</span></label>
+              <input id="complainant_ref" name="complainant_ref" type="text" maxlength="50" value="{{ values.complainant_ref }}" autocomplete="off" aria-describedby="complainant_help {% if errors.complainant_ref %}complainant_error{% endif %}" {% if errors.complainant_ref %}aria-invalid="true"{% endif %} required>
+              <p class="form-help" id="complainant_help">A fictional identifier used as your status verification code. It is shown on the acknowledgement page. Do not use Aadhaar, PAN, a government username or any real credential.</p>
+              {% if errors.complainant_ref %}<p class="field-error" id="complainant_error">{{ errors.complainant_ref }}</p>{% endif %}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-section">
+          <legend><span class="legend-num">2</span> Grievance information</legend>
+          <div class="field-grid">
+            <div class="field field--span2">
+              <label for="subject">Grievance subject / title <span class="req">*</span></label>
+              <input id="subject" name="subject" type="text" minlength="5" maxlength="150" value="{{ values.subject }}" aria-describedby="subject_help {% if errors.subject %}subject_error{% endif %}" {% if errors.subject %}aria-invalid="true"{% endif %} required>
+              <p class="form-help" id="subject_help">A short summary, between 5 and 150 characters.</p>
+              {% if errors.subject %}<p class="field-error" id="subject_error">{{ errors.subject }}</p>{% endif %}
+            </div>
+            <div class="field">
+              <label for="category">Grievance category <span class="req">*</span></label>
+              <select id="category" name="category" aria-describedby="category_help {% if errors.category %}category_error{% endif %}" {% if errors.category %}aria-invalid="true"{% endif %} required>
+                <option value="">Select a category</option>
+                {% for category in categories %}
+                <option value="{{ category }}" {% if values.category == category %}selected{% endif %}>{{ category }}</option>
+                {% endfor %}
+              </select>
+              <p class="form-help" id="category_help">A demonstration category, not a real routing decision.</p>
+              {% if errors.category %}<p class="field-error" id="category_error">{{ errors.category }}</p>{% endif %}
+            </div>
+            <div class="field">
+              <label for="region">State / region <span class="req">*</span></label>
+              <select id="region" name="region" aria-describedby="region_help {% if errors.region %}region_error{% endif %}" {% if errors.region %}aria-invalid="true"{% endif %} required>
+                <option value="">Select a region</option>
+                {% for region in regions %}
+                <option value="{{ region }}" {% if values.region == region %}selected{% endif %}>{{ region }}</option>
+                {% endfor %}
+              </select>
+              <p class="form-help" id="region_help">Used only for grouping and display in this local demo.</p>
+              {% if errors.region %}<p class="field-error" id="region_error">{{ errors.region }}</p>{% endif %}
+            </div>
+            <div class="field field--span2">
+              <label for="organisation">Ministry / department / organisation <span class="req">*</span></label>
+              <select id="organisation" name="organisation" aria-describedby="organisation_help {% if errors.organisation %}organisation_error{% endif %}" {% if errors.organisation %}aria-invalid="true"{% endif %} required>
+                <option value="">Select a demo organisation</option>
+                {% for organisation in organisations %}
+                <option value="{{ organisation }}" {% if values.organisation == organisation %}selected{% endif %}>{{ organisation }}</option>
+                {% endfor %}
+              </select>
+              <p class="form-help" id="organisation_help">These are example names from the reference context. Selecting one does not send anything to it.</p>
+              {% if errors.organisation %}<p class="field-error" id="organisation_error">{{ errors.organisation }}</p>{% endif %}
+            </div>
+            <div class="field field--span2">
+              <label for="description">Detailed grievance description <span class="req">*</span></label>
+              <textarea id="description" name="description" rows="9" minlength="30" maxlength="5000" aria-describedby="description_help description_count {% if errors.description %}description_error{% endif %}" {% if errors.description %}aria-invalid="true"{% endif %} required>{{ values.description }}</textarea>
+              <div class="field-meta">
+                <p class="form-help" id="description_help">Describe the fictional issue, what happened and what outcome the demo complainant expects. 30–5,000 characters. Do not include real personal or sensitive information.</p>
+                <span class="char-count" id="description_count" aria-live="polite">{{ values.description|length }} / 5000</span>
+              </div>
+              {% if errors.description %}<p class="field-error" id="description_error">{{ errors.description }}</p>{% endif %}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-section">
+          <legend><span class="legend-num">3</span> Optional demo attachment</legend>
+          <div class="field">
+            <label for="attachment">Attachment <span class="optional">optional</span></label>
+            <input id="attachment" name="attachment" type="file" accept=".pdf,.txt,.png,.jpg,.jpeg" aria-describedby="attachment_help {% if errors.attachment %}attachment_error{% endif %}" {% if errors.attachment %}aria-invalid="true"{% endif %}>
+            <p class="form-help" id="attachment_help">PDF, TXT, PNG, JPG or JPEG, up to 2 MB. The file is stored under a random local name and is not published or sent anywhere.</p>
+            {% if errors.attachment %}<p class="field-error" id="attachment_error">{{ errors.attachment }}</p>{% endif %}
+          </div>
+        </fieldset>
+
+        <fieldset class="form-section">
+          <legend><span class="legend-num">4</span> Demo declaration</legend>
+          <label class="check-row" for="declaration">
+            <input id="declaration" name="declaration" type="checkbox" value="yes" {% if errors.declaration %}aria-invalid="true"{% endif %} required>
+            <span>I understand this is an <strong>educational demo</strong>, the information is fictional, no real grievance is filed, and no government office will receive it. <span class="req">*</span></span>
+          </label>
+          {% if errors.declaration %}<p class="field-error" id="declaration_error">{{ errors.declaration }}</p>{% endif %}
+        </fieldset>
+
+        <div class="form-actions form-actions--sticky">
+          <a class="btn btn--outline" href="/">Cancel</a>
+          <button class="btn btn--primary btn--large" type="submit">Submit Demo Grievance <span aria-hidden="true">→</span></button>
+        </div>
+      </form>
+    </div>
+
+    <aside class="form-aside">
+      <div class="card card--guidance">
+        <span class="eyebrow eyebrow--dark">Guidance</span>
+        <h2>What happens next</h2>
+        <ol class="step-list">
+          <li><span>1</span><div><strong>Validation</strong><p>Required fields are checked on the server.</p></div></li>
+          <li><span>2</span><div><strong>Saved locally</strong><p>A record is written to SQLite with a unique reference.</p></div></li>
+          <li><span>3</span><div><strong>Timeline created</strong><p>The initial "Received — Demo" event is recorded.</p></div></li>
+          <li><span>4</span><div><strong>Track it</strong><p>Use the reference and verification code to open the history.</p></div></li>
+        </ol>
+      </div>
+      <div class="card card--tint">
+        <h2>Sample subject</h2>
+        <p class="sample-copy">"Delay in issue of a demo income certificate"</p>
+        <p class="small-muted">Use only fictional names, dates and details. Do not describe a real person or a real government matter.</p>
+      </div>
+      <div class="card">
+        <h2>Privacy reminder</h2>
+        <p class="small-muted">Attachments and descriptions are stored unencrypted in the local SQLite database. This project is not suitable for real personal data.</p>
+        <a class="text-link" href="/privacy">Read the demo data policy →</a>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

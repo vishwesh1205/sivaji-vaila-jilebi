@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { Bell, LayoutDashboard, Building2, FileText, AlertTriangle, CheckSquare, BarChart3, Upload, Search, Database, TrendingUp, Calculator } from 'lucide-react'
+import { Bell, LayoutDashboard, Building2, FileText, AlertTriangle, CheckSquare, BarChart3, Search, Database, GitCompare } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import api from '../lib/api'
 
@@ -8,27 +9,28 @@ const nav = [
   { to: '/institutions', label: 'Institutions', icon: Building2 },
   { to: '/cases', label: 'Case Tracking', icon: FileText },
   { to: '/overlaps', label: 'Overlap Alerts', icon: AlertTriangle },
-  { to: '/emerging', label: 'Emerging Issues', icon: TrendingUp },
-  { to: '/impact', label: 'Impact Simulator', icon: Calculator },
   { to: '/sources', label: 'Data Sources', icon: Database },
   { to: '/review', label: 'Resolution Review', icon: CheckSquare },
+  { to: '/matching', label: 'Matching Evaluation', icon: GitCompare },
   { to: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
-  { to: '/import', label: 'Data Import', icon: Upload },
 ]
 
 export default function Layout() {
   const navigate = useNavigate()
+  const [search, setSearch] = useState('')
   const { data: me } = useQuery({ queryKey: ['me'], queryFn: async () => (await api.get('/auth/me')).data })
   const { data: notifs } = useQuery({ queryKey: ['notifs'], queryFn: async () => (await api.get('/notifications')).data, refetchInterval: 30000 })
   const unread = notifs?.filter((n: any) => !n.is_read).length || 0
 
   return (
     <div className="min-h-screen flex">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-white focus:text-heading focus:px-4 focus:py-2 focus:rounded-lg focus:shadow">Skip to main content</a>
       <aside className="w-[232px] bg-sidebar-bg text-sidebar-text flex flex-col">
+        <div className="sr-only">Sidebar navigation</div>
         <div className="px-6 py-5 border-b border-white/10">
           <div className="font-serif text-lg text-white">AICTE / Complaint Monitoring</div>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        <nav aria-label="Primary" className="flex-1 px-3 py-4 space-y-1">
           {nav.map((item) => (
             <NavLink
               key={item.to}
@@ -50,14 +52,16 @@ export default function Layout() {
       </aside>
       <div className="flex-1 flex flex-col">
         <header className="h-16 bg-white border-b border-card-border flex items-center px-6 gap-4">
-          <div className="flex-1 flex items-center gap-2 max-w-xl">
+          <form onSubmit={(event) => { event.preventDefault(); const term = search.trim(); if (term) navigate(`/cases?search=${encodeURIComponent(term)}`) }} className="flex-1 flex items-center gap-2 max-w-xl">
             <Search size={18} className="text-muted" />
             <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
               placeholder="Search institution / AICTE ID / Case ID"
               className="flex-1 bg-transparent text-sm focus:outline-none"
               aria-label="Global search"
             />
-          </div>
+          </form>
           <button onClick={() => navigate('/notifications')} className="relative p-2 rounded-lg hover:bg-page-bg" aria-label="Notifications">
             <Bell size={18} />
             {unread > 0 && <span className="absolute -top-1 -right-1 w-2 h-2 bg-alert-badge rounded-full"></span>}
@@ -73,7 +77,7 @@ export default function Layout() {
             <button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} className="text-sm text-muted hover:text-heading">Logout</button>
           </div>
         </header>
-        <main className="flex-1 p-6">
+        <main id="main-content" tabIndex={-1} className="flex-1 p-6 focus:outline-none">
           <Outlet />
         </main>
       </div>

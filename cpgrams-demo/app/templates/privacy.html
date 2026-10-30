@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Privacy & Demo Data Policy{% endblock %}
+{% block content %}
+<section class="page-hero page-hero--maroon compact">
+  <div class="container page-hero__inner">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span aria-current="page">Privacy &amp; demo data</span></nav>
+      <span class="eyebrow eyebrow--light">Local data policy</span>
+      <h1>Privacy &amp; Demo Data Policy</h1>
+      <p>What this local educational demo stores, what it deliberately does not collect, and how to remove everything.</p>
+    </div>
+    <div class="page-hero__badge">LOCAL ONLY<br><span>NO ANALYTICS</span></div>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="container narrow">
+    <article class="card prose">
+      <h2>1. Unofficial status</h2>
+      <p>This application is an unofficial educational replica. It is not connected to the Government of India, CPGRAMS, DARPG, NIC or any ministry. Nothing submitted here is a real government grievance.</p>
+
+      <h2>2. What is stored</h2>
+      <ul>
+        <li>Demo complaint details you enter: complainant reference, subject, category, organisation, region and description.</li>
+        <li>Optional attachment metadata and the file itself, stored under a random local filename.</li>
+        <li>Demo events, feedback, contact messages and fictional profile details.</li>
+        <li>A signed local session cookie containing the demo display name and demo account reference.</li>
+        <li>A language preference cookie.</li>
+      </ul>
+
+      <h2>3. What is never requested</h2>
+      <ul>
+        <li>Government usernames or passwords.</li>
+        <li>Aadhaar, PAN or other national identifiers.</li>
+        <li>OTPs, CAPTCHA responses or security answers.</li>
+        <li>Real phone numbers, financial information or sensitive personal data.</li>
+      </ul>
+      <p><strong>Do not enter real personal or sensitive information.</strong> The demo is not designed or secured for it.</p>
+
+      <h2>4. Where data lives</h2>
+      <p>By default, records are stored in <code>cpgrams-demo/data/cpgrams_demo.db</code> and attachments in <code>cpgrams-demo/data/uploads</code> on the computer running the application. The SQLite file is not encrypted. It is not sent to any external service.</p>
+
+      <h2>5. Optional dashboard adapter</h2>
+      <p>If, and only if, an operator explicitly sets <code>DASHBOARD_INGEST_URL</code> and a bearer token, newly submitted demo complaints are also sent to that configured local endpoint. The local record is always retained, even if the network request fails. No adapter is configured by default and no request is ever sent to the real CPGRAMS portal.</p>
+
+      <h2>6. Cookies</h2>
+      <p>The demo uses three first-party cookies: a signed demo session, a short-lived flash message and a language preference. No advertising, analytics or third-party tracking cookies are used.</p>
+
+      <h2>7. Logs</h2>
+      <p>The local web server may print request logs to the terminal. The application itself does not create an analytics trail. Error messages may contain form values in local server logs if an unexpected failure occurs.</p>
+
+      <h2>8. Retention and deletion</h2>
+      <p>Data remains until you delete it. To remove all demo records and recreate the seed data, stop the server and run:</p>
+      <pre class="code-block">cd cpgrams-demo
+python -m app.seed --reset</pre>
+      <p>To delete the database and uploads manually, remove <code>data/cpgrams_demo.db</code> and the files under <code>data/uploads</code>. The database is recreated on the next startup.</p>
+
+      <h2>9. Real complaints</h2>
+      <p>For a real grievance, use the official CPGRAMS portal at <a href="{{ official_url }}" target="_blank" rel="noopener noreferrer">pgportal.gov.in</a>. This project cannot forward, store, escalate or resolve a real complaint.</p>
+
+      <div class="warning-panel">
+        <strong>EDUCATIONAL DEMO — UNOFFICIAL REPLICA.</strong>
+        <p>NOT CONNECTED TO THE GOVERNMENT OF INDIA. NO REAL GOVERNMENT GRIEVANCE IS FILED.</p>
+      </div>
+    </article>
+  </div>
+</section>
+{% endblock %}

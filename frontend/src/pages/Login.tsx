@@ -36,14 +36,14 @@ export default function Login() {
         </div>
         <form onSubmit={submit} className="space-y-4">
           <div>
-            <label className="block text-sm mb-1 text-heading">Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border border-card-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-success/30" required />
+            <label htmlFor="login-email" className="block text-sm mb-1 text-heading">Email</label>
+            <input id="login-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} aria-invalid={!!error} className="w-full border border-card-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-success/30" required />
           </div>
           <div>
-            <label className="block text-sm mb-1 text-heading">Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border border-card-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-success/30" required />
+            <label htmlFor="login-password" className="block text-sm mb-1 text-heading">Password</label>
+            <input id="login-password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} aria-invalid={!!error} className="w-full border border-card-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-success/30" required />
           </div>
-          {error && <div className="text-sm text-red-600">{error}</div>}
+          {error && <div role="alert" className="text-sm text-red-600">{error}</div>}
           <button disabled={loading} className="w-full bg-primary text-white rounded-lg py-2 text-sm hover:opacity-95 disabled:opacity-60">{loading ? 'Signing in...' : 'Sign In'}</button>
         </form>
         <div className="mt-6 text-xs text-muted">

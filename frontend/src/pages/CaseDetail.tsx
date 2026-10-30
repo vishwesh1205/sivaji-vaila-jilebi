@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useParams } from 'react-router-dom'
-import { Fingerprint, History } from 'lucide-react'
+import { Link, useParams } from 'react-router-dom'
+import { AlertTriangle, Fingerprint, History, Scale, ThumbsDown, ThumbsUp } from 'lucide-react'
 import api from '../lib/api'
 import SourceBadge from '../components/SourceBadge'
 import ProvenanceDrawer from '../components/ProvenanceDrawer'
@@ -17,7 +17,21 @@ export default function CaseDetail() {
   const [remarks, setRemarks] = useState('')
   const [error, setError] = useState('')
   const [showOriginal, setShowOriginal] = useState(false)
+  const [sameCategory, setSameCategory] = useState(false)
+  const [sameInstitution, setSameInstitution] = useState(false)
   const { data } = useQuery({ queryKey: ['case', id], queryFn: async () => (await api.get(`/cases/${id}`)).data })
+  const precedents = useQuery({
+    queryKey: ['precedents', id, sameCategory, sameInstitution],
+    queryFn: async () => (await api.get(`/cases/${id}/precedents`, { params: { limit: 5, same_category: sameCategory, same_institution: sameInstitution } })).data,
+    enabled: !!id,
+  })
+  const precedentFeedback = useMutation({
+    mutationFn: async ({ precedentId, feedback }: { precedentId: number; feedback: string }) => (await api.post(`/cases/${id}/precedents/${precedentId}/feedback`, { feedback })).data,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['precedents', id] })
+      qc.invalidateQueries({ queryKey: ['case', id] })
+    },
+  })
   const setOutcomeMutation = useMutation({
     mutationFn: async (payload: { outcome_tag: string; acknowledge_conflict: boolean; remarks: string }) => (await api.post(`/cases/${id}/outcome`, payload)).data,
     onSuccess: () => {
@@ -144,6 +158,63 @@ export default function CaseDetail() {
               )) : <div className="text-sm text-muted">No linked cases.</div>}
             </div>
           </div>
+          {data.status !== 'DISPOSED' && (
+            <div className="bg-card-bg border border-card-border rounded-card">
+              <div className="px-5 py-4 border-b border-card-border flex items-center justify-between gap-2">
+                <div className="font-medium text-heading flex items-center gap-2"><Scale size={16} /> Precedents <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-page-bg border border-card-border text-muted">ADVISORY</span></div>
+                <button onClick={() => precedents.refetch()} disabled={precedents.isFetching} className="text-xs text-muted hover:text-heading disabled:opacity-50">{precedents.isFetching ? 'Searching…' : 'Refresh'}</button>
+              </div>
+              <div className="p-5 space-y-3">
+                <p className="text-xs text-muted">Similar resolved complaints provide context only. They do not set or recommend an automatic outcome.</p>
+                <div className="flex flex-wrap gap-4 text-xs text-muted">
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={sameCategory} onChange={(event) => setSameCategory(event.target.checked)} /> Same category</label>
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={sameInstitution} onChange={(event) => setSameInstitution(event.target.checked)} disabled={!data.institution} /> Same institution</label>
+                </div>
+                {precedents.data?.outcome_conflict && (
+                  <div className="rounded-lg border border-alert-border bg-alert-bg p-3 text-xs text-alert-text flex items-start gap-2">
+                    <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+                    <span>{precedents.data.outcome_conflict_note}</span>
+                  </div>
+                )}
+                {precedents.data?.candidates?.map((candidate: any) => (
+                  <div key={candidate.case_id} className="rounded-lg border border-card-border p-3 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <Link to={`/cases/${candidate.case_id}`} className="text-sm font-medium text-heading hover:underline">{candidate.case_number}</Link>
+                        <div className="text-xs text-muted mt-0.5">
+                          {candidate.category?.replace(/_/g, ' ')}
+                          {candidate.category_subtype ? ` · ${candidate.category_subtype.replace(/_/g, ' ')}` : ''}
+                          {candidate.institution?.name ? ` · ${candidate.institution.name}` : ''}
+                          {candidate.cross_language ? ' · cross-language' : ''}
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="text-xs text-muted">Similarity</div>
+                        <div className="text-sm font-semibold text-heading">{Math.round(candidate.score * 100)}%</div>
+                      </div>
+                    </div>
+                    <div className="text-sm text-heading">{candidate.subject || 'Untitled grievance'}</div>
+                    <div className="text-xs text-muted">Recorded outcome: <span className="text-heading">{candidate.outcome_tag?.replace(/_/g, ' ') || 'Not recorded'}</span> · {candidate.status?.replace(/_/g, ' ')} · {candidate.date_received?.slice(0, 10)}</div>
+                    {(candidate.why_similar?.length || 0) > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {candidate.why_similar.map((term: string) => <span key={term} className="px-1.5 py-0.5 rounded bg-page-bg border border-card-border text-[10px] text-muted">{term}</span>)}
+                      </div>
+                    )}
+                    <p className="text-xs text-muted line-clamp-3">{candidate.narrative_excerpt}</p>
+                    <div className="flex items-center gap-2 text-[11px] text-muted">
+                      <span>Was this precedent useful?</span>
+                      <button onClick={() => precedentFeedback.mutate({ precedentId: candidate.case_id, feedback: 'HELPFUL' })} disabled={precedentFeedback.isPending} className={`inline-flex items-center gap-1 px-2 py-1 rounded border ${candidate.feedback?.my_feedback === 'HELPFUL' ? 'bg-success text-white border-success' : 'border-card-border hover:bg-page-bg'}`}><ThumbsUp size={12} /> Helpful</button>
+                      <button onClick={() => precedentFeedback.mutate({ precedentId: candidate.case_id, feedback: 'NOT_HELPFUL' })} disabled={precedentFeedback.isPending} className={`inline-flex items-center gap-1 px-2 py-1 rounded border ${candidate.feedback?.my_feedback === 'NOT_HELPFUL' ? 'bg-alert-badge text-white border-alert-badge' : 'border-card-border hover:bg-page-bg'}`}><ThumbsDown size={12} /> Not useful</button>
+                      <button onClick={() => precedentFeedback.mutate({ precedentId: candidate.case_id, feedback: 'WRONG_MATCH' })} disabled={precedentFeedback.isPending} className={`inline-flex items-center gap-1 px-2 py-1 rounded border ${candidate.feedback?.my_feedback === 'WRONG_MATCH' ? 'bg-alert-badge text-white border-alert-badge' : 'border-card-border hover:bg-page-bg'}`}>Wrong match</button>
+                    </div>
+                  </div>
+                ))}
+                {!precedents.isFetching && !precedents.data?.candidates?.length && <div className="text-sm text-muted">No resolved precedents matched these filters.</div>}
+                {precedents.data?.semantic_note && <div className="text-[11px] text-muted">{precedents.data.semantic_note}</div>}
+                {precedentFeedback.isError && <div className="text-xs text-red-700">Could not save precedent feedback.</div>}
+              </div>
+            </div>
+          )}
           <div className="bg-card-bg border border-card-border rounded-card">
             <div className="px-5 py-4 border-b border-card-border font-medium text-heading">Attachments</div>
             <div className="p-5 space-y-2">

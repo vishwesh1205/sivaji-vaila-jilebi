@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Demo Grievance {{ complaint.registration_number }}{% endblock %}
+{% block content %}
+<section class="page-hero page-hero--navy page-hero--compact">
+  <div class="container page-hero__inner">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/status">View status</a><span aria-hidden="true">/</span><span aria-current="page">{{ complaint.registration_number }}</span></nav>
+      <span class="eyebrow eyebrow--light">Demo record</span>
+      <h1>{{ complaint.subject }}</h1>
+      <p class="hero-meta"><span class="mono">{{ complaint.registration_number }}</span> · submitted {{ complaint.created_at | dt }}</p>
+    </div>
+    <span class="status-badge status-badge--{{ complaint.status | status_tone }} status-badge--large">{{ complaint.status }}</span>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="container detail-layout">
+    <div class="detail-main">
+      <div class="card">
+        <div class="card__head card__head--border">
+          <div><span class="eyebrow eyebrow--dark">Grievance details</span><h2>Record information</h2></div>
+          <button class="btn btn--ghost btn--small" type="button" data-print>Print</button>
+        </div>
+        <dl class="detail-grid">
+          <div><dt>Registration number</dt><dd class="mono">{{ complaint.registration_number }}</dd></div>
+          <div><dt>Verification code</dt><dd class="mono">{{ complaint.complainant_ref }}</dd></div>
+          <div><dt>Category</dt><dd>{{ complaint.category }}</dd></div>
+          <div><dt>Organisation</dt><dd>{{ complaint.organisation }}</dd></div>
+          <div><dt>State / region</dt><dd>{{ complaint.region }}</dd></div>
+          <div><dt>Last updated</dt><dd>{{ complaint.updated_at | dt }}</dd></div>
+          <div><dt>Attachment</dt><dd>{% if complaint.attachment_name %}{{ complaint.attachment_name }} <span class="pill pill--grey">local only</span>{% else %}None{% endif %}</dd></div>
+          <div><dt>Dashboard adapter</dt><dd>
+            {% if complaint.dashboard_sync_status == 'synced' %}<span class="pill pill--green">Synced</span>
+            {% elif complaint.dashboard_sync_status == 'pending' %}<span class="pill pill--amber">Pending retry</span>
+            {% else %}<span class="pill pill--grey">Not configured</span>{% endif %}
+          </dd></div>
+        </dl>
+        <div class="description-block">
+          <h3>Description</h3>
+          <p class="description-text">{{ complaint.description }}</p>
+        </div>
+        <div class="record-stamp">
+          <strong>No real government grievance exists for this record.</strong>
+          <span>This page is generated from a local SQLite row. The reference, timeline and responses are fictional.</span>
+        </div>
+      </div>
+
+      <div class="card timeline-card" id="timeline">
+        <div class="card__head card__head--border">
+          <div><span class="eyebrow eyebrow--dark">History</span><h2>Status timeline</h2></div>
+          <span class="pill pill--blue">{{ events|length }} event{% if events|length != 1 %}s{% endif %}</span>
+        </div>
+        <ol class="timeline">
+          {% for event in events %}
+          <li class="timeline__item">
+            <span class="timeline__dot timeline__dot--{{ event.event_type|lower }}" aria-hidden="true"></span>
+            <div class="timeline__body">
+              <div class="timeline__head">
+                <strong>{{ event.event_type | event_label }}</strong>
+                <time datetime="{{ event.created_at }}">{{ event.created_at | dt }}</time>
+              </div>
+              <p>{{ event.description }}</p>
+            </div>
+          </li>
+          {% endfor %}
+        </ol>
+      </div>
+
+      <div class="card clarification-card" id="clarification">
+        <div class="card__head card__head--border">
+          <div><span class="eyebrow eyebrow--dark">Simulated interaction</span><h2>Add a reminder or clarification</h2></div>
+          <span class="pill pill--amber">Demo only</span>
+        </div>
+        <p>Append a fictional note to this record's history. It is stored locally and is not sent to an officer.</p>
+        {% if complaint.status == 'Closed — Demo' %}
+        <div class="inline-notice inline-notice--amber">This record is closed. Adding a clarification will reopen it in the demo as <strong>Reopened — Demo</strong>.</div>
+        {% endif %}
+        <form action="/reminder" method="post" class="stack-form stack-form--compact">
+          <input type="hidden" name="reference" value="{{ complaint.registration_number }}">
+          <input type="hidden" name="verification" value="{{ complaint.complainant_ref }}">
+          <input type="hidden" name="next" value="/status/view?ref={{ complaint.registration_number | urlencode }}&amp;verification={{ complaint.complainant_ref | urlencode }}">
+          <div class="field">
+            <label for="inline_message">Clarification or reminder <span class="req">*</span></label>
+            <textarea id="inline_message" name="message" rows="4" minlength="10" maxlength="2000" required placeholder="Add fictional information or ask for a demo update..."></textarea>
+            <p class="form-help">10–2,000 characters. Do not include real personal information.</p>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn--primary" type="submit">Add to timeline <span aria-hidden="true">→</span></button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <aside class="detail-side">
+      <div class="side-stack">
+        <div class="card status-summary">
+          <span class="eyebrow eyebrow--dark">Current status</span>
+          <div class="status-orb status-orb--{{ complaint.status | status_tone }}"><span>{{ complaint.status }}</span></div>
+          <p class="small-muted">Updated {{ complaint.updated_at | dt }}</p>
+          <div class="progress-track" aria-hidden="true">
+            <span class="progress-track__bar progress-track__bar--{{ complaint.status | status_tone }}"></span>
+          </div>
+          <div class="progress-labels"><span>Received</span><span>Review</span><span>Closed</span></div>
+        </div>
+
+        <div class="card">
+          <h2>Feedback</h2>
+          {% if feedback %}
+          <div class="rating-display" aria-label="Rated {{ feedback.rating }} out of 5">
+            {% for n in range(1, 6) %}<span class="{% if n <= feedback.rating %}is-filled{% endif %}" aria-hidden="true">★</span>{% endfor %}
+            <strong>{{ feedback.rating }}/5</strong>
+          </div>
+          {% if feedback.feedback_text %}<p class="feedback-quote">“{{ feedback.feedback_text }}”</p>{% endif %}
+          <p class="small-muted">Recorded {{ feedback.created_at | dt }}. Stored locally only.</p>
+          {% elif complaint.status == 'Closed — Demo' %}
+          <p>This demo record is closed. You can submit a simulated satisfaction rating.</p>
+          <a class="btn btn--primary btn--full" href="/feedback?ref={{ complaint.registration_number | urlencode }}&verification={{ complaint.complainant_ref | urlencode }}">Rate this demo grievance</a>
+          {% else %}
+          <p class="small-muted">Feedback becomes available when a demo record is closed. This record is currently open.</p>
+          <span class="pill pill--grey">Not yet available</span>
+          {% endif %}
+        </div>
+
+        <div class="card">
+          <h2>Quick actions</h2>
+          <div class="side-actions">
+            <a class="side-action" href="/reminder?ref={{ complaint.registration_number | urlencode }}&verification={{ complaint.complainant_ref | urlencode }}"><span>Add clarification</span><span aria-hidden="true">→</span></a>
+            <a class="side-action" href="/export/complaints.json"><span>Export demo JSON</span><span aria-hidden="true">→</span></a>
+            <a class="side-action" href="/status"><span>Look up another record</span><span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+
+        <div class="card card--tint">
+          <h2>Unofficial demo</h2>
+          <p class="small-muted">This status page is not connected to the CPGRAMS status service. Never enter a real registration number, password or OTP here.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

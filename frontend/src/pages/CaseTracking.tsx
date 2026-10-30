@@ -1,32 +1,86 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { ChevronDown, ChevronUp, Search } from 'lucide-react'
 import api from '../lib/api'
 import SourceBadge from '../components/SourceBadge'
 import QueryChips from '../components/QueryChips'
 
+const PAGE_SIZE = 50
 const label = (value?: string | null) => (value || '—').replace(/_/g, ' ').toLowerCase()
 
+function csvCell(value: unknown) {
+  return `"${String(value ?? '').replace(/"/g, '""')}"`
+}
+
+function exportRowsToCsv(rows: any[], institutions: boolean) {
+  if (!rows.length) return
+  const headers = institutions
+    ? ['Institution', 'AICTE ID', 'Region', 'Source']
+    : ['Case ID', 'Subject', 'Institution', 'Complainant', 'Bureau', 'Category', 'Sub-type', 'Status', 'Last action', 'Days open', 'Source']
+  const body = rows.map((row) => institutions
+    ? [row.name, row.aicte_permanent_id, row.region, row.source_type]
+    : [row.case_id, row.subject || row.narrative_preview, row.institution_name || row.raw_institution_text, label(row.complainant_type), row.bureau_code, label(row.category), label(row.category_subtype), label(row.status), row.last_action_text, row.days_open, `${row.source_type || ''}${row.source_name ? ` / ${row.source_name}` : ''}`])
+  const csv = [headers, ...body].map((line) => line.map(csvCell).join(',')).join('\r\n')
+  const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${institutions ? 'institutions' : 'cases'}-export-${new Date().toISOString().slice(0, 10)}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 export default function CaseTracking() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const urlSearch = searchParams.get('search') || ''
   const [input, setInput] = useState('')
   const [submitted, setSubmitted] = useState('')
+  const [search, setSearch] = useState(urlSearch)
+  const [page, setPage] = useState(1)
   const [expanded, setExpanded] = useState<number | null>(null)
-  const { data } = useQuery({ queryKey: ['cases'], queryFn: async () => (await api.get('/cases')).data })
-  const { data: nl, isFetching } = useQuery({
+  const { data, isFetching: casesFetching } = useQuery({
+    queryKey: ['cases', page, search],
+    queryFn: async () => (await api.get('/cases', { params: { page, limit: PAGE_SIZE, ...(search ? { q: search } : {}) } })).data,
+    enabled: !submitted,
+  })
+  const { data: nl, isFetching: nlFetching } = useQuery({
     queryKey: ['case-query', submitted],
     queryFn: async () => (await api.post('/innovations/query/execute', { query: submitted })).data,
     enabled: !!submitted,
   })
+
+  useEffect(() => {
+    setSearch(urlSearch)
+    setPage(1)
+  }, [urlSearch])
+
+  useEffect(() => {
+    setPage(1)
+  }, [submitted])
 
   const submit = (text: string) => {
     setInput(text)
     setSubmitted(text.trim())
   }
 
+  const clearSearch = () => {
+    setSearch('')
+    setSearchParams({})
+    setPage(1)
+  }
+
   const showNl = !!submitted && !!nl
   const showInstitutions = showNl && nl.target === 'institutions'
-  const rows = showNl ? nl.results : data?.items || []
+  const allRows = showNl ? nl.results || [] : data?.items || []
+  const total = showNl ? nl.result_count || allRows.length : data?.total || 0
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const rows = showNl ? allRows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) : allRows
+  const isFetching = showNl ? nlFetching : casesFetching
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages)
+  }, [page, totalPages])
 
   return (
     <div className="space-y-4">
@@ -35,8 +89,15 @@ export default function CaseTracking() {
           <h1 className="text-xl font-semibold text-heading">Case Tracking</h1>
           <p className="text-sm text-muted">Track, filter and query all cases</p>
         </div>
-        <button className="bg-primary text-white px-4 py-2 rounded-lg text-sm">CSV Export</button>
+        <button onClick={() => exportRowsToCsv(rows, showInstitutions)} disabled={!rows.length} title="Exports the rows currently shown" className="bg-primary text-white px-4 py-2 rounded-lg text-sm disabled:opacity-50">CSV Export</button>
       </div>
+
+      {search && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-card-border bg-card-bg px-4 py-3 text-sm">
+          <span className="text-muted">Filtering by <span className="text-heading font-medium">{search}</span></span>
+          <button onClick={clearSearch} className="text-xs text-muted hover:text-heading">Clear search</button>
+        </div>
+      )}
 
       <div className="bg-card-bg border border-card-border rounded-card p-4 space-y-3">
         <form onSubmit={(e) => { e.preventDefault(); submit(input) }} className="flex items-center gap-2">
@@ -58,7 +119,7 @@ export default function CaseTracking() {
             <div className="text-xs text-muted">Target: {nl.target} · {nl.result_count} result(s)</div>
           </div>
         )}
-        {isFetching && <div className="text-xs text-muted">Interpreting query…</div>}
+        {isFetching && <div className="text-xs text-muted">{showNl ? 'Interpreting query…' : 'Loading cases…'}</div>}
       </div>
 
       {showInstitutions ? (
@@ -148,7 +209,18 @@ export default function CaseTracking() {
           </table>
         </div>
       )}
-      {!showNl && <div className="text-xs text-muted">{data?.total || 0} cases total · showing first {data?.items?.length || 0}</div>}
+
+      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted">
+        <span>
+          {total} {showInstitutions ? 'institution(s)' : 'case(s)'} total
+          {total > 0 ? ` · showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, total)}` : ''}
+        </span>
+        <div className="flex items-center gap-2">
+          <button disabled={page <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))} className="px-3 py-1.5 rounded-lg border border-card-border disabled:opacity-40">Previous</button>
+          <span>Page {page} of {totalPages}</span>
+          <button disabled={page >= totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))} className="px-3 py-1.5 rounded-lg border border-card-border disabled:opacity-40">Next</button>
+        </div>
+      </div>
     </div>
   )
 }
