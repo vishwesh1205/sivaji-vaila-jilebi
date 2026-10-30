@@ -59,6 +59,30 @@ cd frontend && npm install && npm run dev
 ```
 When running outside Docker, set `CSS_BASE_URL=http://127.0.0.1:8101`, `CPGRAMS_BASE_URL=http://127.0.0.1:8102`, `CSS_ADMIN_URL=http://127.0.0.1:8101`, and `CPGRAMS_ADMIN_URL=http://127.0.0.1:8102` for the backend process. The scheduler syncs both simulators every 20 seconds.
 
+## CPGRAMS educational demo integration
+The separate `cpgrams-demo/` site is an explicitly unofficial educational replica. A grievance submitted there can be sent to this dashboard through the existing authenticated `POST /ingest/json` endpoint. Demo-origin cases are stored with `source_name=CPGRAMS Simulator`, `source_type=SIMULATOR`, `is_synthetic=true`, their subject and a raw-payload provenance record, so they appear in Case Tracking and dashboard totals with the correct `SIMULATOR` badge.
+
+Run the demo locally against this dashboard:
+
+```bash
+cd cpgrams-demo
+python -m app.seed
+DASHBOARD_INGEST_URL=http://127.0.0.1:8000/ingest/json \
+DASHBOARD_USERNAME=admin@aicte.gov.in \
+DASHBOARD_PASSWORD=admin123 \
+python -m uvicorn app.main:app --reload --port 8090
+```
+
+The demo caches the dashboard login and refreshes it after a `401`. Use a dedicated dashboard account outside local demo use; do not put a personal administrator password in a public deployment.
+
+### Deployment
+- Deploy `cpgrams-demo/` to Vercel as a FastAPI project with `CPGRAMS_DB_URL` pointing to a Turso/libSQL database. Vercel's local filesystem is ephemeral, so plain SQLite is not durable there.
+- Deploy `frontend/` to Vercel as a Vite project and set `VITE_API_BASE_URL` to the public dashboard API URL.
+- Run the dashboard backend on a container host with persistent PostgreSQL and a stable URL. Its scheduler and long-running database jobs are not suitable for a short-lived serverless function.
+- Set the demo's `DASHBOARD_INGEST_URL`, `DASHBOARD_USERNAME`, and `DASHBOARD_PASSWORD` to the deployed dashboard values, then submit a test grievance and confirm it appears in Case Tracking as `SIMULATOR / CPGRAMS Simulator`.
+
+See `cpgrams-demo/README.md` for the full environment-variable reference and Vercel steps.
+
 ## Part 2 features
 - Connector architecture with YAML field mappings, canonical ticket model, date/category/language normalization, rate limiting, retries, file mode, and labelled snapshot fallback.
 - Raw payload retention (immutable JSON + SHA-256) for every ingested record; idempotent re-sync by source + record ID.
@@ -78,6 +102,8 @@ When running outside Docker, set `CSS_BASE_URL=http://127.0.0.1:8101`, `CPGRAMS_
 - Deterministic, idempotent in-place reseed: existing case IDs, users, institutions and bureaus are preserved; `SEED_RANDOM_SEED` controls the corpus.
 - Planted overlap clusters, ambiguous institution references, unresolved references and contradictory dispositions for demonstrations.
 - Case Tracking/Case Detail expose subject, sub-type, complainant type, expandable narrative and a synthetic-data badge; overlap alerts highlight shared narrative tokens.
+- Matching Evaluation compares five reproducible lexical matchers on a versioned 240-pair synthetic benchmark, with a group-safe development/test split.
+- Case Detail shows similar resolved precedents as advisory context, with explicit outcome-conflict handling and audited helpful/not-useful/wrong-match feedback.
 - Reseed without changing source or case IDs:
 ```bash
 make reseed-realistic              # default seed 20261025
@@ -119,16 +145,34 @@ make reseed-realistic SEED=20261026
 | ro.chandigarh@aicte.gov.in | ro123 | REGIONAL_OFFICER |
 
 ## Entity Resolution & Overlap (explain)
-- **Resolution:** deterministic AICTE ID → normalization (abbrev/unidecode) → blocking → rapidfuzz token_set_ratio + address/city/state/alias scoring. `>=0.90` auto-link, `0.65-0.90` review queue, `<0.65` unresolved. Reviewer confirmations saved as aliases (learning). Prefer false negatives.
-- **Overlap:** rule-first - if institution has active cases in >=2 bureaus → create overlap alert with "why flagged", cross-bureau links, notify officers. TF-IDF cosine similarity enriches near-duplicates. No auto-close; officers must acknowledge/review with reason. Unacknowledged alerts escalate after configurable days.
+- **Resolution:** deterministic AICTE ID → normalization (abbrev/unidecode) → blocking → rapidfuzz token_set_ratio plus exact-name/alias phrase, address and city/state hints inferred from the raw ticket. `>=0.90` auto-link, `0.65-0.90` review queue, `<0.65` unresolved. Reviewer confirmations saved as aliases (learning). Prefer false negatives.
+- **Overlap:** rule-first - if institution has active cases in >=2 bureaus → create overlap alert with "why flagged", cross-bureau links, notify officers. TF-IDF cosine similarity enriches near-duplicates. No auto-close; officers must acknowledge/review with reason. Unacknowledged alerts escalate to MANAGEMENT/ADMIN after `OVERLAP_ESCALATE_DAYS` with a distinct `ESCALATION` notification and an `ESCALATED TO MANAGEMENT` badge.
+- **Resolution benchmark:** Resolution Review runs a deterministic offline harness (240 messy synthetic references, fixed seed) and shows precision/recall/F1, auto-link coverage and run timestamp.
+
+## Matching benchmark & precedents (explain)
+- **Dataset:** `backend/data/matching_benchmark_v1.json` contains 240 pairs drawn from 60 source groups. Labels are assigned by construction (`120 DUPLICATE`, `60 RELATED`, `60 UNRELATED`); there were no human annotators, adjudicators or inter-annotator agreement. The UI and API label this as a synthetic engineering benchmark, not an official accuracy claim.
+- **Split:** source groups are kept together, with seed `20261025` and a 50/50 development/test split (120 pairs each). A runtime assertion rejects any source-group overlap.
+- **Methods:** lexical Jaccard, word TF-IDF, character TF-IDF, fuzzy token-set and a hybrid lexical score. Thresholds are tuned on development data only and then applied unchanged to test data.
+- **Semantic status:** a multilingual sentence-embedding method is listed as unavailable unless the model stack is installed. The API does not fabricate semantic metrics; the current fallback is lexical.
+- **CLI:** from `backend/`:
+```bash
+python -m app.benchmarks.runner --json /tmp/matching.json --csv /tmp/matching.csv
+```
+or `make matching-benchmark` from the repository root.
+- **API/UI:** `GET /matching/evaluation` returns methods, per-class metrics, confusion matrices, language groups, cross-language results, ablations, unavailable-method reasons and provenance. The Matching Evaluation page renders the same data and caches the evaluation.
+- **Precedents:** `GET /cases/{id}/precedents` returns scoped, similar *resolved* cases for an open complaint. Results are advisory only (`automatic_action: false`), expose contradictory outcomes instead of suppressing them, and use the same server-side bureau/region scope rules as case access.
+- **Feedback:** `POST /cases/{id}/precedents/{precedent_case_id}/feedback` stores one of `HELPFUL`, `NOT_HELPFUL` or `WRONG_MATCH` per user/precedent and writes a hash-chained audit action. Feedback is evidence about usefulness, not an instruction to adopt the precedent's outcome.
+- **No automatic inference:** precedents never set, recommend or copy an outcome. They show recorded outcomes, similarity reasons and excerpts for human judgement.
 
 ## Core demo script (3 min)
 1. Login as `admin@aicte.gov.in` / `admin123`. Dashboard shows KPIs, source proof, top-risk institutions, and the hero institution **St. Xavier Institute of Technology** (PGRC `PG-2026-4471` + RB `RB-2026-0892`).
 2. Go to Overlap Alerts → expand an alert, view side-by-side cases, trace provenance, download the evidence pack, acknowledge.
 3. Go to Case Tracking, use the NL query bar; open a case and show Institution 360 merged timeline across bureaus.
-4. Go to Resolution Review - see an ambiguous match, confirm to learn the alias.
-5. Go to Data Import, upload `backend/sample_data/css_tickets.csv`.
-6. Go to Reports - export bureau-wise/ageing/overlaps as CSV/XLSX/PDF.
+4. Go to Resolution Review - see the timestamped precision/recall/F1 benchmark and an ambiguous match; confirm to learn the alias.
+5. Go to Matching Evaluation - show the synthetic-provenance warning, five-method comparison, language groups and semantic-method unavailable status.
+6. Open an open case from Case Tracking - inspect the advisory precedents panel, contradictory-outcome warning and feedback controls.
+7. Go to Data Import - upload `backend/sample_data/css_tickets.csv`, a JSON case batch, or an institution master CSV/XLSX.
+8. Go to Reports - export bureau-wise/ageing/overlaps as CSV/XLSX/PDF (all 8 report types × 4 formats are verified).
 
 ## Configuration
 Connector modes are controlled by `SOURCE_MODE_CSS` / `SOURCE_MODE_CPGRAMS` (`simulator`, `file`, `live`). Live connectors are read-only and fall back to bundled snapshots with visible `SNAPSHOT` / `STALE` state. Key settings are documented in `.env.example`; mappings live in `backend/config/*_mapping.yaml`.
@@ -138,14 +182,14 @@ Connector modes are controlled by `SOURCE_MODE_CSS` / `SOURCE_MODE_CPGRAMS` (`si
 make backend-test      # connector, ingestion, lineage, risk, conflict, duplicate, spike, NL, impact and reseed tests
 make frontend-build    # TypeScript + production build
 ```
-The suite covers idempotent re-sync, raw payload retention, snapshot fallback, four-stage lineage, risk breakdown arithmetic, conflicting outcome acknowledgement, cross-channel duplicates, spike thresholds, NL parsing, deterministic impact replay, narrative validation and deterministic realistic reseeding.
+The suite covers idempotent re-sync, raw payload retention, snapshot fallback, four-stage lineage, risk breakdown arithmetic, conflicting outcome acknowledgement, cross-channel duplicates, spike thresholds, NL parsing, deterministic impact replay, resolution precision/recall/F1, matching benchmark determinism and group isolation, semantic-unavailable honesty, precedent scope and outcome conflicts, audited precedent feedback, overlap escalation, institution-master GRC import, report export serialization, narrative validation and deterministic realistic reseeding.
 
 ## Assumptions
 - Synthetic institutions/cases only; no PII from real systems.
 - The realistic reseed mutates the local SQLite demo corpus in place; back up `backend/aicte.db` before experimenting with a new seed.
 - CSS/CPGRAMS formats vary - mappings are external YAML, not hardcoded.
 - Live public endpoints may be unavailable; snapshots are used and labelled as such.
-- Sentence-transformers optional behind flag (TF-IDF used by default).
+- Overlap near-duplicate scoring uses TF-IDF, not sentence embeddings. This is a deliberate demo choice: it runs offline and deterministically without downloading model weights, needs no GPU, works on the SQLite corpus, and exposes token-level overlap that officers can inspect. The rule-based cross-bureau trigger remains authoritative; TF-IDF only enriches near-duplicate links. Sentence embeddings would add a model artifact, latency and opaque similarity, so they are not enabled in this build.
 - Regional scoping enforced server-side; sensitive narratives are masked for non-owning bureaus.
 
 ## Limitations & Next Steps
@@ -154,3 +198,4 @@ The suite covers idempotent re-sync, raw payload retention, snapshot fallback, f
 - Sentence embeddings upgrade with vector store
 - SSO/SAML, fine-grained field-level masking, e-signatures
 - Workflow engine for SLAs/escalations with configurable rules
+# Reva-dashboard
